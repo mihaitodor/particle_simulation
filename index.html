@@ -43,18 +43,43 @@
 
 	console.clear();
 
+	const DIMENSIONS = 1;
+	const PARTICLE_COUNT = 100;
+	const PARTICLE_VELOCITY_MAX = DIMENSIONS / 64;
+	const PARTICLE_VELOCITY_MIN = DIMENSIONS / 128;
+	//const SPHERE_MASS = 1;
+
 	// Handles which need to be accessed when rendering frames
 	let scene, camera, renderer, controls, stats;
 
 	// Animated objects
-	let sphereOfInfluence;
+	let sphereOfInfluence, particles = [], visibleParticles = [];
+
+	// Check to see if the position of the ball doesn't go past the wall and
+	// also check to see if it's velocity is less than or greater than 0 so
+	// it doesn't spike past and get stuck by the edge of the wall
+	function checkWallBoundaries(current) {
+	    if(current.position.x >= DIMENSIONS / 2 - current.geometry.parameters.radius && current.velocity.x > 0 || current.position.x <= -DIMENSIONS / 2 + current.geometry.parameters.radius && current.velocity.x < 0)
+	        current.velocity.setX(-current.velocity.x);
+
+	    if(current.position.y >= DIMENSIONS / 2 - current.geometry.parameters.radius && current.velocity.y > 0 || current.position.y <= -DIMENSIONS / 2 + current.geometry.parameters.radius && current.velocity.y < 0)
+	        current.velocity.setY(-current.velocity.y);
+
+	    if(current.position.z >= DIMENSIONS / 2 - current.geometry.parameters.radius && current.velocity.z > 0 || current.position.z <= -DIMENSIONS / 2 + current.geometry.parameters.radius && current.velocity.z < 0)
+	        current.velocity.setZ(-current.velocity.z);
+	}
 
 	function updateObjects() {
 		sphereOfInfluence.rotation.y += 0.005;
+
+		for(let i = 0; i < particles.length; i++) {
+			particles[i].position.add(particles[i].velocity);
+			checkWallBoundaries(particles[i]);
+		}
 	}
 
-	function render() {
-		requestAnimationFrame(render);
+	function renderLoop() {
+		requestAnimationFrame(renderLoop);
 
 		updateObjects();
 
@@ -66,10 +91,6 @@
 	function init() {
 		scene = new THREE.Scene();
 		scene.background = new THREE.Color('white')
-		camera = new THREE.PerspectiveCamera();
-		camera.position.z = 1.7;
-		camera.position.x = 0.7;
-		camera.position.y = 0.1;
 
 		renderer = new THREE.WebGLRenderer({ antialias: true });
 		renderer.setPixelRatio(window.devicePixelRatio);
@@ -81,8 +102,11 @@
 		animationContainer.appendChild(stats.dom);
 
 		let bbClientRect = renderer.domElement.getBoundingClientRect();
-		camera.aspect = bbClientRect.width / bbClientRect.height;
-		camera.updateProjectionMatrix();
+		// Use the default values from the PerspectiveCamera constructor
+		camera = new THREE.PerspectiveCamera(50, bbClientRect.width / bbClientRect.height, 0.1, 2000);
+		camera.position.z = DIMENSIONS * 2;
+		camera.position.x = DIMENSIONS * 0.7;
+		camera.position.y = DIMENSIONS * 0.1;
 		renderer.setSize( bbClientRect.width, bbClientRect.height );
 		window.addEventListener('resize', function() {
 			renderer.setSize(animationContainer.offsetWidth, animationContainer.offsetHeight);
@@ -92,7 +116,7 @@
 		//controls.enableZoom = false;
 
 		let box = new THREE.Mesh(
-			new THREE.BoxBufferGeometry(1, 1, 1),
+			new THREE.BoxBufferGeometry(DIMENSIONS, DIMENSIONS, DIMENSIONS),
 			new THREE.MeshBasicMaterial({ color: new THREE.Color('red'), transparent: true, opacity: 0.1 })
 		);
 		let boxEdges = new THREE.LineSegments(
@@ -103,7 +127,7 @@
 		scene.add(box);
 
 		sphereOfInfluence = new THREE.Mesh(
-			new THREE.SphereGeometry(0.2),
+			new THREE.SphereGeometry(DIMENSIONS * 0.2),
 			new THREE.MeshBasicMaterial({ color: new THREE.Color('blue'), transparent: true, opacity: 0.0 })
 		);
 		let sphereOfInfluenceEdges = new THREE.LineSegments(
@@ -114,12 +138,34 @@
 		box.add(sphereOfInfluence);
 
 		let target = new THREE.Mesh(
-			new THREE.SphereGeometry(0.1, 30, 30),
-			new THREE.MeshBasicMaterial({ color: new THREE.Color('green')})
+			new THREE.SphereGeometry(DIMENSIONS * 0.1, 30, 30),
+			new THREE.MeshBasicMaterial({ color: new THREE.Color('green') })
 		);
 		sphereOfInfluence.add(target);
 
-		render();
+		// Create particles
+		let geometry = new THREE.SphereGeometry(DIMENSIONS * 0.005, 32, 32);
+		let material = new THREE.MeshBasicMaterial({
+			color: new THREE.Color('red')
+		});
+		for(let i = 0; i < PARTICLE_COUNT; i++) {
+			let particle = new THREE.Mesh(geometry, material);
+
+			particle.velocity = new THREE.Vector3(
+				Math.random() * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN,
+				Math.random() * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN,
+				Math.random() * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN
+			);
+
+			particle.visible = true;
+
+			particles.push(particle);
+			scene.add(particle);
+		}
+
+		//https://mihaitodor.github.io/particle_simulation/textures/particle.png
+
+		renderLoop();
 	}
 
 </script>
