@@ -107,6 +107,8 @@
 		camera.position.z = DIMENSIONS * 2;
 		camera.position.x = DIMENSIONS * 0.7;
 		camera.position.y = DIMENSIONS * 0.1;
+		camera.updateProjectionMatrix();
+
 		renderer.setSize( bbClientRect.width, bbClientRect.height );
 		window.addEventListener('resize', function() {
 			renderer.setSize(animationContainer.offsetWidth, animationContainer.offsetHeight);
@@ -117,7 +119,7 @@
 
 		let box = new THREE.Mesh(
 			new THREE.BoxBufferGeometry(DIMENSIONS, DIMENSIONS, DIMENSIONS),
-			new THREE.MeshBasicMaterial({ color: new THREE.Color('red'), transparent: true, opacity: 0.1 })
+			new THREE.MeshBasicMaterial({ color: new THREE.Color('red'), transparent: true, opacity: 0.1, depthTest: false })
 		);
 		let boxEdges = new THREE.LineSegments(
 			new THREE.EdgesGeometry(box.geometry), // or WireframeGeometry
@@ -128,18 +130,18 @@
 
 		sphereOfInfluence = new THREE.Mesh(
 			new THREE.SphereGeometry(DIMENSIONS * 0.2),
-			new THREE.MeshBasicMaterial({ color: new THREE.Color('blue'), transparent: true, opacity: 0.0 })
+			new THREE.MeshDepthMaterial({ wireframe: true })
 		);
-		let sphereOfInfluenceEdges = new THREE.LineSegments(
-			new THREE.EdgesGeometry(sphereOfInfluence.geometry), // or WireframeGeometry
-			new THREE.LineBasicMaterial({ color: new THREE.Color('blue') })
-		);
-		sphereOfInfluence.add(sphereOfInfluenceEdges);
+
 		box.add(sphereOfInfluence);
 
 		let target = new THREE.Mesh(
 			new THREE.SphereGeometry(DIMENSIONS * 0.1, 30, 30),
-			new THREE.MeshBasicMaterial({ color: new THREE.Color('green') })
+			new THREE.MeshBasicMaterial	({
+				color: new THREE.Color('black'),
+				transparent: true,
+				opacity: 0.6
+			})
 		);
 		sphereOfInfluence.add(target);
 
