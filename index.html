@@ -44,10 +44,14 @@
 	console.clear();
 
 	const DIMENSIONS = 1;
-	const PARTICLE_COUNT = 100;
-	const PARTICLE_VELOCITY_MAX = DIMENSIONS / 64;
-	const PARTICLE_VELOCITY_MIN = DIMENSIONS / 128;
-	//const SPHERE_MASS = 1;
+	const CYLINDER_HEIGHT = 0.2;
+
+	const PARTICLE_COUNT = 2000;
+	const PARTICLE_VELOCITY_MAX = DIMENSIONS / 128;
+	const PARTICLE_VELOCITY_MIN = DIMENSIONS / 1280;
+	const PARTICLES_DELAY = 15;
+	const PARTICLES_BATCH_SIZE = 100;
+	const PARTICLE_BATCHES = ~~(PARTICLE_COUNT / PARTICLES_BATCH_SIZE);
 
 	// Handles which need to be accessed when rendering frames
 	let scene, camera, renderer, controls, stats;
@@ -55,9 +59,12 @@
 	// Animated objects
 	let sphereOfInfluence, particles = [], visibleParticles = [];
 
-	// Check to see if the position of the ball doesn't go past the wall and
-	// also check to see if it's velocity is less than or greater than 0 so
-	// it doesn't spike past and get stuck by the edge of the wall
+	// Keep track of elapsed frames
+	let elapsed = 0;
+
+	// Check to see if the position of the ball doesn't go past the box wall and
+	// also check to see if it's velocity is less than or greater than 0 so it
+	// doesn't spike past and get stuck by the edge of the wall.
 	function checkWallBoundaries(current) {
 	    if(current.position.x >= DIMENSIONS / 2 - current.geometry.parameters.radius && current.velocity.x > 0 || current.position.x <= -DIMENSIONS / 2 + current.geometry.parameters.radius && current.velocity.x < 0)
 	        current.velocity.setX(-current.velocity.x);
@@ -72,10 +79,30 @@
 	function updateObjects() {
 		sphereOfInfluence.rotation.y += 0.005;
 
-		for(let i = 0; i < particles.length; i++) {
-			particles[i].position.add(particles[i].velocity);
-			checkWallBoundaries(particles[i]);
+		for (let i = 0; i < particles.length; i++) {
+			if (particles[i].batch * PARTICLES_DELAY <= elapsed) {
+				particles[i].visible = true;
+				particles[i].position.add(particles[i].velocity);
+				checkWallBoundaries(particles[i]);
+			}
 		}
+/*
+		if (elapsed >= PARTICLE_BATCHES * PARTICLES_DELAY) {
+			for (let i = 0; i < particles.length - PARTICLES_BATCH_SIZE; i++) {
+				particles[i].batch += 1;
+			}
+
+			for (let i = particles.length - PARTICLES_BATCH_SIZE; i < particles.length; i++) {
+				particles[i].batch = 0;
+				// particles[i].visible = false;
+				// particles[i].position.x = -DIMENSIONS / 2;
+				// particles[i].position.y = 0;
+				// particles[i].position.z = 0;
+			}
+
+			//elapsed = 0;
+		}
+*/
 	}
 
 	function renderLoop() {
@@ -86,6 +113,8 @@
 		renderer.render(scene, camera);
 		controls.update();
 		stats.update();
+
+		elapsed += 1;
 	}
 
 	function init() {
@@ -145,24 +174,60 @@
 		);
 		sphereOfInfluence.add(target);
 
+
+		var input = new THREE.Mesh(
+			new THREE.CylinderGeometry(0.05, 0.05, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
+			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
+		);
+		input.position.x = -DIMENSIONS / 2 - CYLINDER_HEIGHT / 2;
+		input.rotation.x = Math.PI / 2;
+		input.rotation.z = Math.PI / 2;
+		let inputEdges = new THREE.LineSegments(
+			new THREE.WireframeGeometry(input.geometry), // or EdgesGeometry
+			new THREE.LineBasicMaterial({ color: new THREE.Color('red') })
+		);
+		input.add(inputEdges);
+		scene.add(input);
+
+		var output = new THREE.Mesh(
+			new THREE.CylinderGeometry(0.05, 0.05, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
+			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
+		);
+		output.position.x = DIMENSIONS / 2 + CYLINDER_HEIGHT / 2;
+		output.rotation.x = Math.PI / 2;
+		output.rotation.z = Math.PI / 2;
+		let outputEdges = new THREE.LineSegments(
+			new THREE.WireframeGeometry(output.geometry), // or EdgesGeometry
+			new THREE.LineBasicMaterial({ color: new THREE.Color('red') })
+		);
+		output.add(outputEdges);
+		scene.add(output);
+
 		// Create particles
 		let geometry = new THREE.SphereGeometry(DIMENSIONS * 0.005, 32, 32);
 		let material = new THREE.MeshBasicMaterial({
 			color: new THREE.Color('red')
 		});
-		for(let i = 0; i < PARTICLE_COUNT; i++) {
-			let particle = new THREE.Mesh(geometry, material);
 
-			particle.velocity = new THREE.Vector3(
-				Math.random() * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN,
-				Math.random() * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN,
-				Math.random() * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN
-			);
+		for (let batch = 0; batch < PARTICLE_BATCHES; batch++) {
+			for (let i = 0; i < PARTICLES_BATCH_SIZE; i++) {
+				let particle = new THREE.Mesh(geometry, material);
+				// Inject particles from the centre of the left side face of the box
+				particle.position.x = -DIMENSIONS / 2;
 
-			particle.visible = true;
+				particle.velocity = new THREE.Vector3(
+					(Math.random() - 0.5) * 2 * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN,
+					(Math.random() - 0.5) * 2 * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN,
+					(Math.random() - 0.5) * 2 * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN
+				);
 
-			particles.push(particle);
-			scene.add(particle);
+				particle.visible = false;
+
+				particle.batch = batch;
+
+				particles.push(particle);
+				scene.add(particle);
+			}
 		}
 
 		//https://mihaitodor.github.io/particle_simulation/textures/particle.png
