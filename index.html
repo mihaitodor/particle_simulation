@@ -46,7 +46,7 @@
 	const DIMENSIONS = 1;
 	const CYLINDER_HEIGHT = 0.2;
 
-	const PARTICLE_COUNT = 2000;
+	const PARTICLE_COUNT = 3000;
 	const PARTICLE_VELOCITY_MAX = DIMENSIONS / 128;
 	const PARTICLE_VELOCITY_MIN = DIMENSIONS / 1280;
 	const PARTICLES_DELAY = 15;
@@ -158,14 +158,14 @@
 		scene.add(box);
 
 		sphereOfInfluence = new THREE.Mesh(
-			new THREE.SphereGeometry(DIMENSIONS * 0.2),
+			new THREE.SphereBufferGeometry(DIMENSIONS * 0.2),
 			new THREE.MeshDepthMaterial({ wireframe: true })
 		);
 
 		box.add(sphereOfInfluence);
 
 		let target = new THREE.Mesh(
-			new THREE.SphereGeometry(DIMENSIONS * 0.1, 30, 30),
+			new THREE.SphereBufferGeometry(DIMENSIONS * 0.1, 30, 30),
 			new THREE.MeshBasicMaterial	({
 				color: new THREE.Color('black'),
 				transparent: true,
@@ -176,7 +176,7 @@
 
 
 		var input = new THREE.Mesh(
-			new THREE.CylinderGeometry(0.05, 0.05, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
+			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
 		input.position.x = -DIMENSIONS / 2 - CYLINDER_HEIGHT / 2;
@@ -190,7 +190,7 @@
 		scene.add(input);
 
 		var output = new THREE.Mesh(
-			new THREE.CylinderGeometry(0.05, 0.05, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
+			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
 		output.position.x = DIMENSIONS / 2 + CYLINDER_HEIGHT / 2;
@@ -204,7 +204,7 @@
 		scene.add(output);
 
 		// Create particles
-		let geometry = new THREE.SphereGeometry(DIMENSIONS * 0.005, 32, 32);
+		let geometry = new THREE.SphereBufferGeometry(DIMENSIONS * 0.0035, 32, 32);
 		let material = new THREE.MeshBasicMaterial({
 			color: new THREE.Color('red')
 		});
