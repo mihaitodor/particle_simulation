@@ -159,14 +159,14 @@
 
 		sphereOfInfluence = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(DIMENSIONS * 0.2),
-			new THREE.MeshDepthMaterial({ wireframe: true })
+			new THREE.MeshBasicMaterial({ color: new THREE.Color('gray'), wireframe: true })
 		);
 
 		box.add(sphereOfInfluence);
 
 		let target = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(DIMENSIONS * 0.1, 30, 30),
-			new THREE.MeshBasicMaterial	({
+			new THREE.MeshBasicMaterial ({
 				color: new THREE.Color('black'),
 				transparent: true,
 				opacity: 0.6
@@ -229,8 +229,6 @@
 				scene.add(particle);
 			}
 		}
-
-		//https://mihaitodor.github.io/particle_simulation/textures/particle.png
 
 		renderLoop();
 	}
