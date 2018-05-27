@@ -46,12 +46,12 @@
 	const DIMENSIONS = 1;
 	const CYLINDER_HEIGHT = 0.2;
 
-	const PARTICLE_COUNT = 3000;
+	const PARTICLE_COUNT = 10;
+	const PARTICLE_BATCH_SIZE = 10;
+	const PARTICLE_BATCHES = ~~(PARTICLE_COUNT / PARTICLE_BATCH_SIZE);
+	const PARTICLE_BATCH_DELAY = 15;
 	const PARTICLE_VELOCITY_MAX = DIMENSIONS / 128;
 	const PARTICLE_VELOCITY_MIN = DIMENSIONS / 1280;
-	const PARTICLES_DELAY = 15;
-	const PARTICLES_BATCH_SIZE = 100;
-	const PARTICLE_BATCHES = ~~(PARTICLE_COUNT / PARTICLES_BATCH_SIZE);
 
 	// Handles which need to be accessed when rendering frames
 	let scene, camera, renderer, controls, stats;
@@ -80,7 +80,7 @@
 		sphereOfInfluence.rotation.y += 0.005;
 
 		for (let i = 0; i < particles.length; i++) {
-			if (particles[i].batch * PARTICLES_DELAY <= elapsed) {
+			if (particles[i].batch * PARTICLE_BATCH_DELAY <= elapsed) {
 				particles[i].visible = true;
 				particles[i].position.add(particles[i].velocity);
 				checkWallBoundaries(particles[i]);
@@ -166,14 +166,16 @@
 
 		let target = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(DIMENSIONS * 0.1, 30, 30),
-			new THREE.MeshBasicMaterial ({
-				color: new THREE.Color('black'),
+			new THREE.MeshPhongMaterial ({
+				color: new THREE.Color('gray'),
+				shininess: 30, // Default 30
+				// emissive: new THREE.Color('springgreen'),
+				// emissiveIntensity: 0.15,
 				transparent: true,
-				opacity: 0.6
+				opacity: 0.8
 			})
 		);
 		sphereOfInfluence.add(target);
-
 
 		var input = new THREE.Mesh(
 			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
@@ -210,7 +212,7 @@
 		});
 
 		for (let batch = 0; batch < PARTICLE_BATCHES; batch++) {
-			for (let i = 0; i < PARTICLES_BATCH_SIZE; i++) {
+			for (let i = 0; i < PARTICLE_BATCH_SIZE; i++) {
 				let particle = new THREE.Mesh(geometry, material);
 				// Inject particles from the centre of the left side face of the box
 				particle.position.x = -DIMENSIONS / 2;
@@ -229,6 +231,16 @@
 				scene.add(particle);
 			}
 		}
+
+		// DirectionalLight is a plane of light which emits from both sides
+		let light = new THREE.DirectionalLight(new THREE.Color('white'), 0.7);
+		// Position it in front of everything
+		light.position.set(0, 0, DIMENSIONS);
+		scene.add(light);
+
+		// Extra knob to adjust the lights hitting the objects
+		var ambientLight = new THREE.AmbientLight(new THREE.Color('white'), 0.7);
+		scene.add(ambientLight);
 
 		renderLoop();
 	}
