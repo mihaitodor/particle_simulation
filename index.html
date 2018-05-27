@@ -46,10 +46,12 @@
 	const DIMENSIONS = 1;
 	const CYLINDER_HEIGHT = 0.2;
 
+	const PARTICLE_SIZE = 0.0035;
 	const PARTICLE_COUNT = 10;
 	const PARTICLE_BATCH_SIZE = 10;
 	const PARTICLE_BATCHES = ~~(PARTICLE_COUNT / PARTICLE_BATCH_SIZE);
 	const PARTICLE_BATCH_DELAY = 15;
+	const PARTICLE_TIME_IN_BODY = 1000;
 	const PARTICLE_VELOCITY_MAX = DIMENSIONS / 128;
 	const PARTICLE_VELOCITY_MIN = DIMENSIONS / 1280;
 
@@ -79,12 +81,19 @@
 	function updateObjects() {
 		sphereOfInfluence.rotation.y += 0.005;
 
+		// Inject particle batches
 		for (let i = 0; i < particles.length; i++) {
 			if (particles[i].batch * PARTICLE_BATCH_DELAY <= elapsed) {
-				particles[i].visible = true;
-				particles[i].position.add(particles[i].velocity);
-				checkWallBoundaries(particles[i]);
+				let p = particles[i]
+				p.visible = true;
+				p.position.add(p.velocity);
+				visibleParticles.push(p)
 			}
+		}
+
+		// Deal with collisions of in-flight particles
+		for (let i = 0; i < visibleParticles.length; i++) {
+			checkWallBoundaries(visibleParticles[i]);
 		}
 /*
 		if (elapsed >= PARTICLE_BATCHES * PARTICLES_DELAY) {
@@ -138,7 +147,7 @@
 		camera.position.y = DIMENSIONS * 0.1;
 		camera.updateProjectionMatrix();
 
-		renderer.setSize( bbClientRect.width, bbClientRect.height );
+		renderer.setSize(bbClientRect.width, bbClientRect.height);
 		window.addEventListener('resize', function() {
 			renderer.setSize(animationContainer.offsetWidth, animationContainer.offsetHeight);
 		});
@@ -177,7 +186,7 @@
 		);
 		sphereOfInfluence.add(target);
 
-		var input = new THREE.Mesh(
+		let input = new THREE.Mesh(
 			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
@@ -191,7 +200,7 @@
 		input.add(inputEdges);
 		scene.add(input);
 
-		var output = new THREE.Mesh(
+		let output = new THREE.Mesh(
 			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
@@ -206,7 +215,7 @@
 		scene.add(output);
 
 		// Create particles
-		let geometry = new THREE.SphereBufferGeometry(DIMENSIONS * 0.0035, 32, 32);
+		let geometry = new THREE.SphereBufferGeometry(DIMENSIONS * PARTICLE_SIZE, 32, 32);
 		let material = new THREE.MeshBasicMaterial({
 			color: new THREE.Color('red')
 		});
@@ -239,7 +248,7 @@
 		scene.add(light);
 
 		// Extra knob to adjust the lights hitting the objects
-		var ambientLight = new THREE.AmbientLight(new THREE.Color('white'), 0.7);
+		let ambientLight = new THREE.AmbientLight(new THREE.Color('white'), 0.7);
 		scene.add(ambientLight);
 
 		renderLoop();
