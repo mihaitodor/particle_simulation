@@ -47,7 +47,7 @@
 	const CYLINDER_HEIGHT = 0.2;
 
 	const PARTICLE_SIZE = 0.0035;
-	const PARTICLE_COUNT = 10;
+	const PARTICLE_COUNT = 1000;
 	const PARTICLE_BATCH_SIZE = 10;
 	const PARTICLE_BATCHES = ~~(PARTICLE_COUNT / PARTICLE_BATCH_SIZE);
 	const PARTICLE_BATCH_DELAY = 15;
@@ -59,7 +59,7 @@
 	let scene, camera, renderer, controls, stats;
 
 	// Animated objects
-	let sphereOfInfluence, particles = [], visibleParticles = [];
+	let sphereOfInfluence, particleBatches = [], visibleParticles = [];
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
@@ -67,51 +67,41 @@
 	// Check to see if the position of the ball doesn't go past the box wall and
 	// also check to see if it's velocity is less than or greater than 0 so it
 	// doesn't spike past and get stuck by the edge of the wall.
-	function checkWallBoundaries(current) {
-	    if(current.position.x >= DIMENSIONS / 2 - current.geometry.parameters.radius && current.velocity.x > 0 || current.position.x <= -DIMENSIONS / 2 + current.geometry.parameters.radius && current.velocity.x < 0)
-	        current.velocity.setX(-current.velocity.x);
+	function handleBoxWallColisions(particle) {
+	    if(particle.position.x >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
+	        particle.velocity.setX(-particle.velocity.x);
 
-	    if(current.position.y >= DIMENSIONS / 2 - current.geometry.parameters.radius && current.velocity.y > 0 || current.position.y <= -DIMENSIONS / 2 + current.geometry.parameters.radius && current.velocity.y < 0)
-	        current.velocity.setY(-current.velocity.y);
+	    if(particle.position.y >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
+	        particle.velocity.setY(-particle.velocity.y);
 
-	    if(current.position.z >= DIMENSIONS / 2 - current.geometry.parameters.radius && current.velocity.z > 0 || current.position.z <= -DIMENSIONS / 2 + current.geometry.parameters.radius && current.velocity.z < 0)
-	        current.velocity.setZ(-current.velocity.z);
+	    if(particle.position.z >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
+	        particle.velocity.setZ(-particle.velocity.z);
 	}
 
 	function updateObjects() {
 		sphereOfInfluence.rotation.y += 0.005;
 
-		// Inject particle batches
-		for (let i = 0; i < particles.length; i++) {
-			if (particles[i].batch * PARTICLE_BATCH_DELAY <= elapsed) {
-				let p = particles[i]
+		// Release a new batch of particles
+		if (elapsed % PARTICLE_BATCH_DELAY === 0 && particleBatches.length > 0) {
+			let batch = particleBatches.shift();
+
+			for (let i = 0; i < batch.length; i++) {
+				let p = batch[i];
 				p.visible = true;
-				p.position.add(p.velocity);
-				visibleParticles.push(p)
+				p.position.add(p.velocity); // Start moving the particles as soon as they become visible
+				visibleParticles.push(p);
 			}
 		}
 
-		// Deal with collisions of in-flight particles
+		// Animate particles
 		for (let i = 0; i < visibleParticles.length; i++) {
-			checkWallBoundaries(visibleParticles[i]);
-		}
-/*
-		if (elapsed >= PARTICLE_BATCHES * PARTICLES_DELAY) {
-			for (let i = 0; i < particles.length - PARTICLES_BATCH_SIZE; i++) {
-				particles[i].batch += 1;
-			}
+			let p = visibleParticles[i];
 
-			for (let i = particles.length - PARTICLES_BATCH_SIZE; i < particles.length; i++) {
-				particles[i].batch = 0;
-				// particles[i].visible = false;
-				// particles[i].position.x = -DIMENSIONS / 2;
-				// particles[i].position.y = 0;
-				// particles[i].position.z = 0;
-			}
+			p.position.add(p.velocity);
 
-			//elapsed = 0;
+			// Deal with collisions of in-flight particles
+			handleBoxWallColisions(p);
 		}
-*/
 	}
 
 	function renderLoop() {
@@ -220,7 +210,8 @@
 			color: new THREE.Color('red')
 		});
 
-		for (let batch = 0; batch < PARTICLE_BATCHES; batch++) {
+		for (let batchIndex = 0; batchIndex < PARTICLE_BATCHES; batchIndex++) {
+			let batch = [];
 			for (let i = 0; i < PARTICLE_BATCH_SIZE; i++) {
 				let particle = new THREE.Mesh(geometry, material);
 				// Inject particles from the centre of the left side face of the box
@@ -232,13 +223,17 @@
 					(Math.random() - 0.5) * 2 * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN
 				);
 
-				particle.visible = false;
+				particle.visible = false; // Show the particles later, in batches
 
-				particle.batch = batch;
+				particle.isInSOF = false; // Inside the sphere of influence
+				particle.isInTarget = false; // Inside the target sphere
 
-				particles.push(particle);
 				scene.add(particle);
+
+				batch.push(particle);
 			}
+
+			particleBatches.push(batch);
 		}
 
 		// DirectionalLight is a plane of light which emits from both sides
