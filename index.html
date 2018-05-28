@@ -59,7 +59,10 @@
 	let scene, camera, renderer, controls, stats;
 
 	// Animated objects
-	let sphereOfInfluence, particleBatches = [], visibleParticles = [];
+	let regionOfInfluence, particleBatches = [], visibleParticles = [];
+
+	// Math objects
+	let regionOfInfluenceSphere;
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
@@ -68,18 +71,29 @@
 	// also check to see if it's velocity is less than or greater than 0 so it
 	// doesn't spike past and get stuck by the edge of the wall.
 	function handleBoxWallColisions(particle) {
-	    if(particle.position.x >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
-	        particle.velocity.setX(-particle.velocity.x);
+		if(particle.position.x >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
+			particle.velocity.setX(-particle.velocity.x);
 
-	    if(particle.position.y >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
-	        particle.velocity.setY(-particle.velocity.y);
+		if(particle.position.y >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
+			particle.velocity.setY(-particle.velocity.y);
 
-	    if(particle.position.z >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
-	        particle.velocity.setZ(-particle.velocity.z);
+		if(particle.position.z >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
+			particle.velocity.setZ(-particle.velocity.z);
+	}
+
+	function handleSphereWallColisions(particle) {
+		if(particle.position.x >= DIMENSIONS * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -DIMENSIONS * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
+			particle.velocity.setX(-particle.velocity.x);
+
+		if(particle.position.y >= DIMENSIONS * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -DIMENSIONS * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
+			particle.velocity.setY(-particle.velocity.y);
+
+		if(particle.position.z >= DIMENSIONS * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -DIMENSIONS * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
+			particle.velocity.setZ(-particle.velocity.z);
 	}
 
 	function updateObjects() {
-		sphereOfInfluence.rotation.y += 0.005;
+		regionOfInfluence.rotation.y += 0.005;
 
 		// Release a new batch of particles
 		if (elapsed % PARTICLE_BATCH_DELAY === 0 && particleBatches.length > 0) {
@@ -96,8 +110,23 @@
 		// Animate particles
 		for (let i = 0; i < visibleParticles.length; i++) {
 			let p = visibleParticles[i];
-
 			p.position.add(p.velocity);
+
+			if (p.isInROI) {
+				handleSphereWallColisions(p);
+				continue;
+			}
+
+			if (p.isInTarget) {
+				continue;
+			}
+
+			// console.log(p.centre);
+			// 	console.log(p.position);
+
+			if (regionOfInfluenceSphere.containsPoint(p.position)) {
+				p.isInROI = true;
+			}
 
 			// Deal with collisions of in-flight particles
 			handleBoxWallColisions(p);
@@ -156,12 +185,14 @@
 		box.add(boxEdges);
 		scene.add(box);
 
-		sphereOfInfluence = new THREE.Mesh(
+		regionOfInfluence = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(DIMENSIONS * 0.2),
 			new THREE.MeshBasicMaterial({ color: new THREE.Color('gray'), wireframe: true })
 		);
 
-		box.add(sphereOfInfluence);
+		regionOfInfluenceSphere = new THREE.Sphere(regionOfInfluence.centre, DIMENSIONS * 0.2);
+
+		box.add(regionOfInfluence);
 
 		let target = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(DIMENSIONS * 0.1, 30, 30),
@@ -174,7 +205,7 @@
 				opacity: 0.8
 			})
 		);
-		sphereOfInfluence.add(target);
+		regionOfInfluence.add(target);
 
 		let input = new THREE.Mesh(
 			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
@@ -225,7 +256,7 @@
 
 				particle.visible = false; // Show the particles later, in batches
 
-				particle.isInSOF = false; // Inside the sphere of influence
+				particle.isInROI = false; // Inside the region of influence
 				particle.isInTarget = false; // Inside the target sphere
 
 				scene.add(particle);
