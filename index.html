@@ -43,7 +43,7 @@
 
 	console.clear();
 
-	const DIMENSIONS = 1;
+	const SCENE_SCALE = 1;
 	const CYLINDER_HEIGHT = 0.2;
 
 	const PARTICLE_SIZE = 0.0035;
@@ -52,8 +52,8 @@
 	const PARTICLE_BATCHES = ~~(PARTICLE_COUNT / PARTICLE_BATCH_SIZE);
 	const PARTICLE_BATCH_DELAY = 15;
 	const PARTICLE_TIME_IN_BODY = 1000;
-	const PARTICLE_VELOCITY_MAX = DIMENSIONS / 128;
-	const PARTICLE_VELOCITY_MIN = DIMENSIONS / 1280;
+	const PARTICLE_VELOCITY_MAX = SCENE_SCALE / 128;
+	const PARTICLE_VELOCITY_MIN = SCENE_SCALE / 1280;
 
 	// Handles which need to be accessed when rendering frames
 	let scene, camera, renderer, controls, stats;
@@ -71,24 +71,24 @@
 	// also check to see if it's velocity is less than or greater than 0 so it
 	// doesn't spike past and get stuck by the edge of the wall.
 	function handleBoxWallColisions(particle) {
-		if(particle.position.x >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
+		if(particle.position.x >= SCENE_SCALE / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -SCENE_SCALE / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
 			particle.velocity.setX(-particle.velocity.x);
 
-		if(particle.position.y >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
+		if(particle.position.y >= SCENE_SCALE / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -SCENE_SCALE / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
 			particle.velocity.setY(-particle.velocity.y);
 
-		if(particle.position.z >= DIMENSIONS / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -DIMENSIONS / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
+		if(particle.position.z >= SCENE_SCALE / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -SCENE_SCALE / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
 			particle.velocity.setZ(-particle.velocity.z);
 	}
 
 	function handleSphereWallColisions(particle) {
-		if(particle.position.x >= DIMENSIONS * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -DIMENSIONS * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
+		if(particle.position.x >= SCENE_SCALE * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -SCENE_SCALE * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
 			particle.velocity.setX(-particle.velocity.x);
 
-		if(particle.position.y >= DIMENSIONS * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -DIMENSIONS * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
+		if(particle.position.y >= SCENE_SCALE * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -SCENE_SCALE * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
 			particle.velocity.setY(-particle.velocity.y);
 
-		if(particle.position.z >= DIMENSIONS * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -DIMENSIONS * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
+		if(particle.position.z >= SCENE_SCALE * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -SCENE_SCALE * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
 			particle.velocity.setZ(-particle.velocity.z);
 	}
 
@@ -161,9 +161,9 @@
 		let bbClientRect = renderer.domElement.getBoundingClientRect();
 		// Use the default values from the PerspectiveCamera constructor
 		camera = new THREE.PerspectiveCamera(50, bbClientRect.width / bbClientRect.height, 0.1, 2000);
-		camera.position.z = DIMENSIONS * 2;
-		camera.position.x = DIMENSIONS * 0.7;
-		camera.position.y = DIMENSIONS * 0.1;
+		camera.position.z = SCENE_SCALE * 2;
+		camera.position.x = SCENE_SCALE * 0.7;
+		camera.position.y = SCENE_SCALE * 0.1;
 		camera.updateProjectionMatrix();
 
 		renderer.setSize(bbClientRect.width, bbClientRect.height);
@@ -175,7 +175,7 @@
 		//controls.enableZoom = false;
 
 		let box = new THREE.Mesh(
-			new THREE.BoxBufferGeometry(DIMENSIONS, DIMENSIONS, DIMENSIONS),
+			new THREE.BoxBufferGeometry(SCENE_SCALE, SCENE_SCALE, SCENE_SCALE),
 			new THREE.MeshBasicMaterial({ color: new THREE.Color('red'), transparent: true, opacity: 0.1, depthTest: false })
 		);
 		let boxEdges = new THREE.LineSegments(
@@ -186,16 +186,16 @@
 		scene.add(box);
 
 		regionOfInfluence = new THREE.Mesh(
-			new THREE.SphereBufferGeometry(DIMENSIONS * 0.2),
+			new THREE.SphereBufferGeometry(SCENE_SCALE * 0.2),
 			new THREE.MeshBasicMaterial({ color: new THREE.Color('gray'), wireframe: true })
 		);
 
-		regionOfInfluenceSphere = new THREE.Sphere(regionOfInfluence.centre, DIMENSIONS * 0.2);
+		regionOfInfluenceSphere = new THREE.Sphere(regionOfInfluence.centre, SCENE_SCALE * 0.2);
 
 		box.add(regionOfInfluence);
 
 		let target = new THREE.Mesh(
-			new THREE.SphereBufferGeometry(DIMENSIONS * 0.1, 30, 30),
+			new THREE.SphereBufferGeometry(SCENE_SCALE * 0.1, 30, 30),
 			new THREE.MeshPhongMaterial ({
 				color: new THREE.Color('gray'),
 				shininess: 30, // Default 30
@@ -211,7 +211,7 @@
 			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
-		input.position.x = -DIMENSIONS / 2 - CYLINDER_HEIGHT / 2;
+		input.position.x = -SCENE_SCALE / 2 - CYLINDER_HEIGHT / 2;
 		input.rotation.x = Math.PI / 2;
 		input.rotation.z = Math.PI / 2;
 		let inputEdges = new THREE.LineSegments(
@@ -225,7 +225,7 @@
 			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
-		output.position.x = DIMENSIONS / 2 + CYLINDER_HEIGHT / 2;
+		output.position.x = SCENE_SCALE / 2 + CYLINDER_HEIGHT / 2;
 		output.rotation.x = Math.PI / 2;
 		output.rotation.z = Math.PI / 2;
 		let outputEdges = new THREE.LineSegments(
@@ -236,7 +236,7 @@
 		scene.add(output);
 
 		// Create particles
-		let geometry = new THREE.SphereBufferGeometry(DIMENSIONS * PARTICLE_SIZE, 32, 32);
+		let geometry = new THREE.SphereBufferGeometry(SCENE_SCALE * PARTICLE_SIZE, 32, 32);
 		let material = new THREE.MeshBasicMaterial({
 			color: new THREE.Color('red')
 		});
@@ -246,7 +246,7 @@
 			for (let i = 0; i < PARTICLE_BATCH_SIZE; i++) {
 				let particle = new THREE.Mesh(geometry, material);
 				// Inject particles from the centre of the left side face of the box
-				particle.position.x = -DIMENSIONS / 2;
+				particle.position.x = -SCENE_SCALE / 2;
 
 				particle.velocity = new THREE.Vector3(
 					(Math.random() - 0.5) * 2 * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN,
@@ -270,7 +270,7 @@
 		// DirectionalLight is a plane of light which emits from both sides
 		let light = new THREE.DirectionalLight(new THREE.Color('white'), 0.7);
 		// Position it in front of everything
-		light.position.set(0, 0, DIMENSIONS);
+		light.position.set(0, 0, SCENE_SCALE);
 		scene.add(light);
 
 		// Extra knob to adjust the lights hitting the objects
