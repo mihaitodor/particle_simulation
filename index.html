@@ -37,6 +37,7 @@
 <script src="js/three.min.js"></script>
 <script src="js/OrbitControls.js"></script>
 <script src="js/stats.min.js"></script>
+<script src="js/dat.gui.min.js"></script>
 
 <script>
 	"use strict";
@@ -44,19 +45,22 @@
 	console.clear();
 
 	const SCENE_SCALE = 1;
-	const CYLINDER_HEIGHT = 0.2;
 
-	const PARTICLE_SIZE = 0.0035;
-	const PARTICLE_COUNT = 1000;
-	const PARTICLE_BATCH_SIZE = 10;
-	const PARTICLE_BATCHES = ~~(PARTICLE_COUNT / PARTICLE_BATCH_SIZE);
-	const PARTICLE_BATCH_DELAY = 15;
-	const PARTICLE_TIME_IN_BODY = 1000;
-	const PARTICLE_VELOCITY_MAX = SCENE_SCALE / 128;
-	const PARTICLE_VELOCITY_MIN = SCENE_SCALE / 1280;
+	let Config = function() {
+		this.boxAspectRatio = 1.3;
+		this.cylinderHeight = 0.2;
+
+		this.particleSize = 0.0035;
+		this.particleCount = 1000;
+		this.particleBatchSize = 10;
+		this.particleBatchDelay = 15;
+		this.particleTimeInBody = 1000;
+		this.particleVelocityMin = SCENE_SCALE / 100;
+		this.particleVelocityMax = SCENE_SCALE / 1000;
+	};
 
 	// Handles which need to be accessed when rendering frames
-	let scene, camera, renderer, controls, stats;
+	let scene, camera, renderer, controls, stats, gui, config;
 
 	// Animated objects
 	let regionOfInfluence, particleBatches = [], visibleParticles = [];
@@ -96,7 +100,7 @@
 		regionOfInfluence.rotation.y += 0.005;
 
 		// Release a new batch of particles
-		if (elapsed % PARTICLE_BATCH_DELAY === 0 && particleBatches.length > 0) {
+		if (elapsed % config.particleBatchDelay === 0 && particleBatches.length > 0) {
 			let batch = particleBatches.shift();
 
 			for (let i = 0; i < batch.length; i++) {
@@ -145,7 +149,38 @@
 		elapsed += 1;
 	}
 
+	function adjustParticleSize() {
+		console.log("TODO adjustParticleSize");
+	}
+
+	function resetAnimation() {
+		console.log("TODO resetAnimation");
+	}
+
+	function initGUI() {
+		gui = new dat.GUI();
+
+		// Save the config to localStorage
+		gui.remember(config);
+
+		let sceneFolder = gui.addFolder('Scene');
+		sceneFolder.add(config, 'boxAspectRatio', 0.3, 3).onFinishChange(resetAnimation);
+		sceneFolder.add(config, 'cylinderHeight', 0.1, 0.5).onFinishChange(resetAnimation);
+
+		let particlesFolder = gui.addFolder('Particles');
+		particlesFolder.add(config, 'particleSize', 0.001, 0.01).onChange(adjustParticleSize);
+		particlesFolder.add(config, 'particleCount', 1, 3000).onFinishChange(resetAnimation);
+		particlesFolder.add(config, 'particleBatchSize', 1, 100).onFinishChange(resetAnimation);
+		particlesFolder.add(config, 'particleBatchDelay', 5, 40).onFinishChange(resetAnimation);
+		particlesFolder.add(config, 'particleTimeInBody', 100, 3000).onFinishChange(resetAnimation);
+		// TODO: set these dynamically?
+		particlesFolder.add(config, 'particleVelocityMin', SCENE_SCALE / 10, SCENE_SCALE / 500).onFinishChange(resetAnimation);
+		particlesFolder.add(config, 'particleVelocityMax', SCENE_SCALE / 500, SCENE_SCALE / 2000).onFinishChange(resetAnimation);
+	}
+
 	function init() {
+		config = new Config();
+
 		scene = new THREE.Scene();
 		scene.background = new THREE.Color('white')
 
@@ -157,6 +192,8 @@
 
 		stats = new Stats();
 		animationContainer.appendChild(stats.dom);
+
+		initGUI();
 
 		let bbClientRect = renderer.domElement.getBoundingClientRect();
 		// Use the default values from the PerspectiveCamera constructor
@@ -208,10 +245,10 @@
 		regionOfInfluence.add(target);
 
 		let input = new THREE.Mesh(
-			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
+			new THREE.CylinderBufferGeometry(0.025, 0.025, config.cylinderHeight, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
-		input.position.x = -SCENE_SCALE / 2 - CYLINDER_HEIGHT / 2;
+		input.position.x = -SCENE_SCALE / 2 - config.cylinderHeight / 2;
 		input.rotation.x = Math.PI / 2;
 		input.rotation.z = Math.PI / 2;
 		let inputEdges = new THREE.LineSegments(
@@ -222,10 +259,10 @@
 		scene.add(input);
 
 		let output = new THREE.Mesh(
-			new THREE.CylinderBufferGeometry(0.025, 0.025, CYLINDER_HEIGHT, 8, 1, false, 0.0, Math.PI * 2),
+			new THREE.CylinderBufferGeometry(0.025, 0.025, config.cylinderHeight, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
-		output.position.x = SCENE_SCALE / 2 + CYLINDER_HEIGHT / 2;
+		output.position.x = SCENE_SCALE / 2 + config.cylinderHeight / 2;
 		output.rotation.x = Math.PI / 2;
 		output.rotation.z = Math.PI / 2;
 		let outputEdges = new THREE.LineSegments(
@@ -236,22 +273,22 @@
 		scene.add(output);
 
 		// Create particles
-		let geometry = new THREE.SphereBufferGeometry(SCENE_SCALE * PARTICLE_SIZE, 32, 32);
+		let geometry = new THREE.SphereBufferGeometry(SCENE_SCALE * config.particleSize, 32, 32);
 		let material = new THREE.MeshBasicMaterial({
 			color: new THREE.Color('red')
 		});
 
-		for (let batchIndex = 0; batchIndex < PARTICLE_BATCHES; batchIndex++) {
+		for (let batchIndex = 0; batchIndex < ~~(config.particleCount / config.particleBatchSize); batchIndex++) {
 			let batch = [];
-			for (let i = 0; i < PARTICLE_BATCH_SIZE; i++) {
+			for (let i = 0; i < config.particleBatchSize; i++) {
 				let particle = new THREE.Mesh(geometry, material);
 				// Inject particles from the centre of the left side face of the box
 				particle.position.x = -SCENE_SCALE / 2;
 
 				particle.velocity = new THREE.Vector3(
-					(Math.random() - 0.5) * 2 * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN,
-					(Math.random() - 0.5) * 2 * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN,
-					(Math.random() - 0.5) * 2 * (PARTICLE_VELOCITY_MAX - PARTICLE_VELOCITY_MIN) + PARTICLE_VELOCITY_MIN
+					(Math.random() - 0.5) * 2 * (config.particleVelocityMax - config.particleVelocityMin) + config.particleVelocityMin,
+					(Math.random() - 0.5) * 2 * (config.particleVelocityMax - config.particleVelocityMin) + config.particleVelocityMin,
+					(Math.random() - 0.5) * 2 * (config.particleVelocityMax - config.particleVelocityMin) + config.particleVelocityMin
 				);
 
 				particle.visible = false; // Show the particles later, in batches
