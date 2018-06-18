@@ -47,7 +47,8 @@
 	const SCENE_SCALE = 1;
 
 	let Config = function() {
-		this.boxAspectRatio = 1.3;
+		this.boxHeight = 1.5;
+		this.boxAspectRatio = 0.6;
 		this.cylinderHeight = 0.2;
 
 		this.particleSize = 0.0035;
@@ -62,8 +63,8 @@
 	// Handles which need to be accessed when rendering frames
 	let scene, camera, renderer, controls, stats, gui, config;
 
-	// Animated objects
-	let regionOfInfluence, particleBatches = [], visibleParticles = [];
+	// Scene objects
+	let box, regionOfInfluence, particleBatches = [], visibleParticles = [];
 
 	// Math objects
 	let regionOfInfluenceSphere;
@@ -71,17 +72,29 @@
 	// Keep track of elapsed frames
 	let elapsed = 0;
 
+	// Return a random value in interval [-max, -min) \cup [min, max)
+	// TODO: Avoid calling Math.random() twice
+	function getRandomValueWithGap(min, max) {
+		let velocity = Math.random() * (max - min) + min;
+
+		if (Math.random() < 0.5) {
+			return -velocity;
+		}
+
+		return velocity;
+	};
+
 	// Check to see if the position of the ball doesn't go past the box wall and
 	// also check to see if it's velocity is less than or greater than 0 so it
 	// doesn't spike past and get stuck by the edge of the wall.
 	function handleBoxWallColisions(particle) {
-		if(particle.position.x >= SCENE_SCALE / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -SCENE_SCALE / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
+		if(particle.position.x >= box.geometry.parameters.width / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -box.geometry.parameters.width / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
 			particle.velocity.setX(-particle.velocity.x);
 
-		if(particle.position.y >= SCENE_SCALE / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -SCENE_SCALE / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
+		if(particle.position.y >= box.geometry.parameters.height / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -box.geometry.parameters.height / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
 			particle.velocity.setY(-particle.velocity.y);
 
-		if(particle.position.z >= SCENE_SCALE / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -SCENE_SCALE / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
+		if(particle.position.z >= box.geometry.parameters.depth / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -box.geometry.parameters.depth / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
 			particle.velocity.setZ(-particle.velocity.z);
 	}
 
@@ -164,7 +177,8 @@
 		gui.remember(config);
 
 		let sceneFolder = gui.addFolder('Scene');
-		sceneFolder.add(config, 'boxAspectRatio', 0.3, 3).onFinishChange(resetAnimation);
+		sceneFolder.add(config, 'boxHeight', 1, 2).onFinishChange(resetAnimation);
+		sceneFolder.add(config, 'boxAspectRatio', 0.3, 1).onFinishChange(resetAnimation);
 		sceneFolder.add(config, 'cylinderHeight', 0.1, 0.5).onFinishChange(resetAnimation);
 
 		let particlesFolder = gui.addFolder('Particles');
@@ -211,8 +225,8 @@
 		controls = new THREE.OrbitControls(camera, renderer.domElement);
 		//controls.enableZoom = false;
 
-		let box = new THREE.Mesh(
-			new THREE.BoxBufferGeometry(SCENE_SCALE, SCENE_SCALE, SCENE_SCALE),
+		box = new THREE.Mesh(
+			new THREE.BoxBufferGeometry(config.boxAspectRatio * SCENE_SCALE, config.boxHeight * SCENE_SCALE, config.boxAspectRatio * SCENE_SCALE),
 			new THREE.MeshBasicMaterial({ color: new THREE.Color('red'), transparent: true, opacity: 0.1, depthTest: false })
 		);
 		let boxEdges = new THREE.LineSegments(
@@ -248,7 +262,7 @@
 			new THREE.CylinderBufferGeometry(0.025, 0.025, config.cylinderHeight, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
-		input.position.x = -SCENE_SCALE / 2 - config.cylinderHeight / 2;
+		input.position.x = -box.geometry.parameters.width / 2 - config.cylinderHeight / 2;
 		input.rotation.x = Math.PI / 2;
 		input.rotation.z = Math.PI / 2;
 		let inputEdges = new THREE.LineSegments(
@@ -262,7 +276,7 @@
 			new THREE.CylinderBufferGeometry(0.025, 0.025, config.cylinderHeight, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
-		output.position.x = SCENE_SCALE / 2 + config.cylinderHeight / 2;
+		output.position.x = box.geometry.parameters.width / 2 + config.cylinderHeight / 2;
 		output.rotation.x = Math.PI / 2;
 		output.rotation.z = Math.PI / 2;
 		let outputEdges = new THREE.LineSegments(
@@ -283,12 +297,12 @@
 			for (let i = 0; i < config.particleBatchSize; i++) {
 				let particle = new THREE.Mesh(geometry, material);
 				// Inject particles from the centre of the left side face of the box
-				particle.position.x = -SCENE_SCALE / 2;
+				particle.position.x = -box.geometry.parameters.width / 2;
 
 				particle.velocity = new THREE.Vector3(
-					(Math.random() - 0.5) * 2 * (config.particleVelocityMax - config.particleVelocityMin) + config.particleVelocityMin,
-					(Math.random() - 0.5) * 2 * (config.particleVelocityMax - config.particleVelocityMin) + config.particleVelocityMin,
-					(Math.random() - 0.5) * 2 * (config.particleVelocityMax - config.particleVelocityMin) + config.particleVelocityMin
+					getRandomValue(config.particleVelocityMin, config.particleVelocityMax),
+					getRandomValue(config.particleVelocityMin, config.particleVelocityMax),
+					getRandomValue(config.particleVelocityMin, config.particleVelocityMax)
 				);
 
 				particle.visible = false; // Show the particles later, in batches
