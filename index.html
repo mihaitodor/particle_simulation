@@ -59,15 +59,15 @@
 		this.particleBatchSize = 10;
 		this.particleBatchDelay = 15;
 		this.particleTimeInBody = 1000;
-		this.particleVelocityMin = SCENE_SCALE / 100;
-		this.particleVelocityMax = SCENE_SCALE / 1000;
+		this.particleVelocityMin = SCENE_SCALE / 1000;
+		this.particleVelocityMax = SCENE_SCALE / 100;
 	};
 
 	// Handles which need to be accessed when rendering frames
 	let scene, camera, renderer, controls, stats, gui, config;
 
 	// Scene objects
-	let box, regionOfInfluence, target, particleBatches = [], visibleParticles = [];
+	let box, regionOfInfluence, target, particleBatches = [], visibleParticles = [], currentParticleBatch = 0;
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
@@ -118,8 +118,8 @@
 		regionOfInfluence.rotation.y += 0.005;
 
 		// Release a new batch of particles
-		if (elapsed % config.particleBatchDelay === 0 && particleBatches.length > 0) {
-			let batch = particleBatches.shift();
+		if (elapsed % config.particleBatchDelay === 0 && currentParticleBatch < particleBatches.length) {
+			let batch = particleBatches[currentParticleBatch];
 
 			for (let i = 0; i < batch.length; i++) {
 				let p = batch[i];
@@ -127,6 +127,8 @@
 				p.position.add(p.velocity); // Start moving the particles as soon as they become visible
 				visibleParticles.push(p);
 			}
+
+			currentParticleBatch++;
 		}
 
 		// Animate particles
@@ -165,7 +167,25 @@
 	}
 
 	function resetAnimation() {
-		console.log("TODO resetAnimation");
+		for (let i = 0; i < visibleParticles.length; i++) {
+			let p = visibleParticles[i];
+
+			p.position.x = -box.geometry.parameters.width / 2;
+			p.position.y = config.boxHeight / 2 * config.tubeVerticalDisplacement;
+			p.position.z = 0;
+
+			p.velocity = getRandomVelocity();
+
+			p.visible = false; // Show the particles later, in batches
+
+			p.isInROI = false; // Inside the region of influence
+			p.isInTarget = false; // Inside the target sphere
+		}
+
+		visibleParticles = [];
+
+		//elapsed = 0;
+		currentParticleBatch = 0;
 	}
 
 	function initGUI() {
@@ -188,8 +208,8 @@
 		particlesFolder.add(config, 'particleBatchDelay', 5, 40).onFinishChange(resetAnimation);
 		particlesFolder.add(config, 'particleTimeInBody', 100, 3000).onFinishChange(resetAnimation);
 		// TODO: set these dynamically?
-		particlesFolder.add(config, 'particleVelocityMin', SCENE_SCALE / 10, SCENE_SCALE / 500).onFinishChange(resetAnimation);
-		particlesFolder.add(config, 'particleVelocityMax', SCENE_SCALE / 500, SCENE_SCALE / 2000).onFinishChange(resetAnimation);
+		particlesFolder.add(config, 'particleVelocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
+		particlesFolder.add(config, 'particleVelocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
 	}
 
 	function init() {
@@ -300,6 +320,7 @@
 				let particle = new THREE.Mesh(geometry, material);
 				// Inject particles from the centre of the left side face of the box
 				particle.position.x = -box.geometry.parameters.width / 2;
+				particle.position.y = config.boxHeight / 2 * config.tubeVerticalDisplacement;
 
 				particle.velocity = getRandomVelocity();
 
