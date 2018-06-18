@@ -197,9 +197,11 @@
 		let sceneFolder = gui.addFolder('Scene');
 		sceneFolder.add(config, 'boxHeight', 1, 2).onFinishChange(resetAnimation);
 		sceneFolder.add(config, 'boxAspectRatio', 0.3, 1).onFinishChange(resetAnimation);
-		sceneFolder.add(config, 'tubeHeight', 0.1, 0.5).onFinishChange(resetAnimation);
-		sceneFolder.add(config, 'tubeRadius', 0.01, 0.05).onFinishChange(resetAnimation);
-		sceneFolder.add(config, 'tubeVerticalDisplacement', 0.1, 0.9).onFinishChange(resetAnimation);
+
+		let tubesFolder = gui.addFolder('Tubes');
+		tubesFolder.add(config, 'tubeHeight', 0.1, 0.5).onFinishChange(resetAnimation);
+		tubesFolder.add(config, 'tubeRadius', 0.01, 0.05).onFinishChange(resetAnimation);
+		tubesFolder.add(config, 'tubeVerticalDisplacement', 0.1, 0.9).onFinishChange(resetAnimation);
 
 		let particlesFolder = gui.addFolder('Particles');
 		particlesFolder.add(config, 'particleSize', 0.001, 0.01).onChange(adjustParticleSize);
