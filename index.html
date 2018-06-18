@@ -54,6 +54,7 @@
 		this.tubeRadius = 0.025;
 		this.tubeVerticalDisplacement = 0.75;
 
+		this.particleColor = '#' + new THREE.Color('red').getHexString();
 		this.particleSize = 0.0035;
 		this.particleCount = 1000;
 		this.particleBatchSize = 10;
@@ -162,6 +163,14 @@
 		elapsed += 1;
 	}
 
+	function adjustParticleColor() {
+		for (let i = 0; i < particleBatches.length; i++) {
+			for (let j = 0; j < particleBatches[i].length; j++) {
+				particleBatches[i][j].material.color.set(config.particleColor);
+			}
+		}
+	}
+
 	function adjustParticleSize() {
 		console.log("TODO adjustParticleSize");
 	}
@@ -204,6 +213,7 @@
 		tubesFolder.add(config, 'tubeVerticalDisplacement', 0.1, 0.9).onFinishChange(resetAnimation);
 
 		let particlesFolder = gui.addFolder('Particles');
+		particlesFolder.addColor(config, 'particleColor').onChange(adjustParticleColor);
 		particlesFolder.add(config, 'particleSize', 0.001, 0.01).onChange(adjustParticleSize);
 		particlesFolder.add(config, 'particleCount', 1, 3000).onFinishChange(resetAnimation);
 		particlesFolder.add(config, 'particleBatchSize', 1, 100).onFinishChange(resetAnimation);
@@ -313,7 +323,7 @@
 		// Create particles
 		let geometry = new THREE.SphereBufferGeometry(SCENE_SCALE * config.particleSize, 32, 32);
 		let material = new THREE.MeshBasicMaterial({
-			color: new THREE.Color('red')
+			color: config.particleColor
 		});
 
 		for (let batchIndex = 0; batchIndex < ~~(config.particleCount / config.particleBatchSize); batchIndex++) {
