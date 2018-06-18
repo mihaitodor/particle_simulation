@@ -64,25 +64,32 @@
 	let scene, camera, renderer, controls, stats, gui, config;
 
 	// Scene objects
-	let box, regionOfInfluence, particleBatches = [], visibleParticles = [];
-
-	// Math objects
-	let regionOfInfluenceSphere;
+	let box, regionOfInfluence, target, particleBatches = [], visibleParticles = [];
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
 
 	// Return a random value in interval [-max, -min) \cup [min, max)
 	// TODO: Avoid calling Math.random() twice
-	function getRandomValueWithGap(min, max) {
-		let velocity = Math.random() * (max - min) + min;
+	function getRandomValueWithGap(min, max, positiveOnly = false) {
+		let rand = Math.random();
 
-		if (Math.random() < 0.5) {
-			return -velocity;
+		let value = rand * (max - min) + min;
+
+		if (positiveOnly || rand > 0.5) {
+			return value;
 		}
 
-		return velocity;
+		return -value;
 	};
+
+	function getRandomVelocity() {
+		return new THREE.Vector3(
+			getRandomValueWithGap(config.particleVelocityMin, config.particleVelocityMax, true),
+			getRandomValueWithGap(config.particleVelocityMin, config.particleVelocityMax),
+			getRandomValueWithGap(config.particleVelocityMin, config.particleVelocityMax)
+		);
+	}
 
 	// Check to see if the position of the ball doesn't go past the box wall and
 	// also check to see if it's velocity is less than or greater than 0 so it
@@ -99,14 +106,9 @@
 	}
 
 	function handleSphereWallColisions(particle) {
-		if(particle.position.x >= SCENE_SCALE * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -SCENE_SCALE * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
-			particle.velocity.setX(-particle.velocity.x);
-
-		if(particle.position.y >= SCENE_SCALE * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -SCENE_SCALE * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
-			particle.velocity.setY(-particle.velocity.y);
-
-		if(particle.position.z >= SCENE_SCALE * 0.2 / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -SCENE_SCALE * 0.2 / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
-			particle.velocity.setZ(-particle.velocity.z);
+		let normal = new THREE.Vector3();
+		normal.subVectors(particle.position, target.geometry.boundingSphere.center).normalize();
+		particle.velocity = particle.velocity.reflect(normal);
 	}
 
 	function updateObjects() {
@@ -129,23 +131,16 @@
 			let p = visibleParticles[i];
 			p.position.add(p.velocity);
 
-			if (p.isInROI) {
+			// if (regionOfInfluenceSphere.containsPoint(p.position)) {
+			// 	p.isInROI = true;
+			// }
+
+			if (p.isInTarget || p.position.distanceTo(target.geometry.boundingSphere.center) < target.geometry.boundingSphere.radius) {
+				p.isInTarget = true;
 				handleSphereWallColisions(p);
 				continue;
 			}
 
-			if (p.isInTarget) {
-				continue;
-			}
-
-			// console.log(p.centre);
-			// 	console.log(p.position);
-
-			if (regionOfInfluenceSphere.containsPoint(p.position)) {
-				p.isInROI = true;
-			}
-
-			// Deal with collisions of in-flight particles
 			handleBoxWallColisions(p);
 		}
 	}
@@ -240,12 +235,9 @@
 			new THREE.SphereBufferGeometry(SCENE_SCALE * 0.2),
 			new THREE.MeshBasicMaterial({ color: new THREE.Color('gray'), wireframe: true })
 		);
-
-		regionOfInfluenceSphere = new THREE.Sphere(regionOfInfluence.centre, SCENE_SCALE * 0.2);
-
 		box.add(regionOfInfluence);
 
-		let target = new THREE.Mesh(
+		target = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(SCENE_SCALE * 0.1, 30, 30),
 			new THREE.MeshPhongMaterial ({
 				color: new THREE.Color('gray'),
@@ -256,6 +248,9 @@
 				opacity: 0.8
 			})
 		);
+
+		target.geometry.computeBoundingSphere();
+
 		regionOfInfluence.add(target);
 
 		let input = new THREE.Mesh(
@@ -299,11 +294,7 @@
 				// Inject particles from the centre of the left side face of the box
 				particle.position.x = -box.geometry.parameters.width / 2;
 
-				particle.velocity = new THREE.Vector3(
-					getRandomValue(config.particleVelocityMin, config.particleVelocityMax),
-					getRandomValue(config.particleVelocityMin, config.particleVelocityMax),
-					getRandomValue(config.particleVelocityMin, config.particleVelocityMax)
-				);
+				particle.velocity = getRandomVelocity();
 
 				particle.visible = false; // Show the particles later, in batches
 
