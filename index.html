@@ -49,7 +49,10 @@
 	let Config = function() {
 		this.boxHeight = 1.5;
 		this.boxAspectRatio = 0.6;
-		this.cylinderHeight = 0.2;
+
+		this.tubeHeight = 0.2;
+		this.tubeRadius = 0.025;
+		this.tubeVerticalDisplacement = 0.75;
 
 		this.particleSize = 0.0035;
 		this.particleCount = 1000;
@@ -174,7 +177,9 @@
 		let sceneFolder = gui.addFolder('Scene');
 		sceneFolder.add(config, 'boxHeight', 1, 2).onFinishChange(resetAnimation);
 		sceneFolder.add(config, 'boxAspectRatio', 0.3, 1).onFinishChange(resetAnimation);
-		sceneFolder.add(config, 'cylinderHeight', 0.1, 0.5).onFinishChange(resetAnimation);
+		sceneFolder.add(config, 'tubeHeight', 0.1, 0.5).onFinishChange(resetAnimation);
+		sceneFolder.add(config, 'tubeRadius', 0.01, 0.05).onFinishChange(resetAnimation);
+		sceneFolder.add(config, 'tubeVerticalDisplacement', 0.1, 0.9).onFinishChange(resetAnimation);
 
 		let particlesFolder = gui.addFolder('Particles');
 		particlesFolder.add(config, 'particleSize', 0.001, 0.01).onChange(adjustParticleSize);
@@ -253,33 +258,35 @@
 
 		regionOfInfluence.add(target);
 
-		let input = new THREE.Mesh(
-			new THREE.CylinderBufferGeometry(0.025, 0.025, config.cylinderHeight, 8, 1, false, 0.0, Math.PI * 2),
+		let inputTube = new THREE.Mesh(
+			new THREE.CylinderBufferGeometry(config.tubeRadius, config.tubeRadius, config.tubeHeight, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
-		input.position.x = -box.geometry.parameters.width / 2 - config.cylinderHeight / 2;
-		input.rotation.x = Math.PI / 2;
-		input.rotation.z = Math.PI / 2;
-		let inputEdges = new THREE.LineSegments(
-			new THREE.WireframeGeometry(input.geometry), // or EdgesGeometry
+		inputTube.position.x = -box.geometry.parameters.width / 2 - config.tubeHeight / 2;
+		inputTube.position.y = config.boxHeight / 2 * config.tubeVerticalDisplacement;
+		inputTube.rotation.x = Math.PI / 2;
+		inputTube.rotation.z = Math.PI / 2;
+		let inputTubeEdges = new THREE.LineSegments(
+			new THREE.WireframeGeometry(inputTube.geometry), // or EdgesGeometry
 			new THREE.LineBasicMaterial({ color: new THREE.Color('red') })
 		);
-		input.add(inputEdges);
-		scene.add(input);
+		inputTube.add(inputTubeEdges);
+		scene.add(inputTube);
 
-		let output = new THREE.Mesh(
-			new THREE.CylinderBufferGeometry(0.025, 0.025, config.cylinderHeight, 8, 1, false, 0.0, Math.PI * 2),
+		let outputTube = new THREE.Mesh(
+			new THREE.CylinderBufferGeometry(config.tubeRadius, config.tubeRadius, config.tubeHeight, 8, 1, false, 0.0, Math.PI * 2),
 			new THREE.MeshBasicMaterial( {color: new THREE.Color('red'), transparent: true, opacity: 0.5 } )
 		);
-		output.position.x = box.geometry.parameters.width / 2 + config.cylinderHeight / 2;
-		output.rotation.x = Math.PI / 2;
-		output.rotation.z = Math.PI / 2;
-		let outputEdges = new THREE.LineSegments(
-			new THREE.WireframeGeometry(output.geometry), // or EdgesGeometry
+		outputTube.position.x = box.geometry.parameters.width / 2 + config.tubeHeight / 2;
+		outputTube.position.y = -config.boxHeight / 2 * config.tubeVerticalDisplacement;
+		outputTube.rotation.x = Math.PI / 2;
+		outputTube.rotation.z = Math.PI / 2;
+		let outputTubeEdges = new THREE.LineSegments(
+			new THREE.WireframeGeometry(outputTube.geometry), // or EdgesGeometry
 			new THREE.LineBasicMaterial({ color: new THREE.Color('red') })
 		);
-		output.add(outputEdges);
-		scene.add(output);
+		outputTube.add(outputTubeEdges);
+		scene.add(outputTube);
 
 		// Create particles
 		let geometry = new THREE.SphereBufferGeometry(SCENE_SCALE * config.particleSize, 32, 32);
