@@ -67,8 +67,11 @@
 	// Handles which need to be accessed when rendering frames
 	let scene, camera, renderer, controls, stats, gui, config;
 
+	// Scene object components
+	let particleGeometry, particleMaterial;
+
 	// Scene objects
-	let box, regionOfInfluence, target, particleBatches = [], visibleParticles = [], currentParticleBatch = 0;
+	let box, regionOfInfluence, target, particles = [], particleBatches = [], visibleParticles = [], currentParticleBatch = 0;
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
@@ -98,21 +101,21 @@
 	// Check to see if the position of the ball doesn't go past the box wall and
 	// also check to see if it's velocity is less than or greater than 0 so it
 	// doesn't spike past and get stuck by the edge of the wall.
-	function handleBoxWallColisions(particle) {
-		if(particle.position.x >= box.geometry.parameters.width / 2 - particle.geometry.parameters.radius && particle.velocity.x > 0 || particle.position.x <= -box.geometry.parameters.width / 2 + particle.geometry.parameters.radius && particle.velocity.x < 0)
-			particle.velocity.setX(-particle.velocity.x);
+	function handleBoxWallColisions(p) {
+		if(p.position.x >= box.geometry.parameters.width / 2 - p.geometry.parameters.radius && p.velocity.x > 0 || p.position.x <= -box.geometry.parameters.width / 2 + p.geometry.parameters.radius && p.velocity.x < 0)
+			p.velocity.setX(-p.velocity.x);
 
-		if(particle.position.y >= box.geometry.parameters.height / 2 - particle.geometry.parameters.radius && particle.velocity.y > 0 || particle.position.y <= -box.geometry.parameters.height / 2 + particle.geometry.parameters.radius && particle.velocity.y < 0)
-			particle.velocity.setY(-particle.velocity.y);
+		if(p.position.y >= box.geometry.parameters.height / 2 - p.geometry.parameters.radius && p.velocity.y > 0 || p.position.y <= -box.geometry.parameters.height / 2 + p.geometry.parameters.radius && p.velocity.y < 0)
+			p.velocity.setY(-p.velocity.y);
 
-		if(particle.position.z >= box.geometry.parameters.depth / 2 - particle.geometry.parameters.radius && particle.velocity.z > 0 || particle.position.z <= -box.geometry.parameters.depth / 2 + particle.geometry.parameters.radius && particle.velocity.z < 0)
-			particle.velocity.setZ(-particle.velocity.z);
+		if(p.position.z >= box.geometry.parameters.depth / 2 - p.geometry.parameters.radius && p.velocity.z > 0 || p.position.z <= -box.geometry.parameters.depth / 2 + p.geometry.parameters.radius && p.velocity.z < 0)
+			p.velocity.setZ(-p.velocity.z);
 	}
 
-	function handleSphereWallColisions(particle) {
+	function handleSphereWallColisions(p) {
 		let normal = new THREE.Vector3();
-		normal.subVectors(particle.position, target.geometry.boundingSphere.center).normalize();
-		particle.velocity = particle.velocity.reflect(normal);
+		normal.subVectors(p.position, target.geometry.boundingSphere.center).normalize();
+		p.velocity = p.velocity.reflect(normal);
 	}
 
 	function updateObjects() {
@@ -176,25 +179,22 @@
 	}
 
 	function resetAnimation() {
+		if (particles.length < config.particleCount) {
+			addParticlesToScene(config.particleCount - particles.length);
+		}
+
 		for (let i = 0; i < visibleParticles.length; i++) {
-			let p = visibleParticles[i];
-
-			p.position.x = -box.geometry.parameters.width / 2;
-			p.position.y = config.boxHeight / 2 * config.tubeVerticalDisplacement;
-			p.position.z = 0;
-
-			p.velocity = getRandomVelocity();
-
-			p.visible = false; // Show the particles later, in batches
-
-			p.isInROI = false; // Inside the region of influence
-			p.isInTarget = false; // Inside the target sphere
+			initParticle(visibleParticles[i]);
 		}
 
 		visibleParticles = [];
 
-		//elapsed = 0;
+		particleBatches = [];
 		currentParticleBatch = 0;
+
+		computeParticleBatches();
+
+		//elapsed = 0; // Probably not useful
 	}
 
 	function initGUI() {
@@ -215,13 +215,54 @@
 		let particlesFolder = gui.addFolder('Particles');
 		particlesFolder.addColor(config, 'particleColor').onChange(adjustParticleColor);
 		particlesFolder.add(config, 'particleSize', 0.001, 0.01).onChange(adjustParticleSize);
-		particlesFolder.add(config, 'particleCount', 1, 3000).onFinishChange(resetAnimation);
-		particlesFolder.add(config, 'particleBatchSize', 1, 100).onFinishChange(resetAnimation);
-		particlesFolder.add(config, 'particleBatchDelay', 5, 40).onFinishChange(resetAnimation);
+		particlesFolder.add(config, 'particleCount', 1, 3000).step(1).onFinishChange(resetAnimation);
+		particlesFolder.add(config, 'particleBatchSize', 1, 100).step(1).onFinishChange(resetAnimation);
+		particlesFolder.add(config, 'particleBatchDelay', 5, 40).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config, 'particleTimeInBody', 100, 3000).onFinishChange(resetAnimation);
 		// TODO: set these dynamically?
 		particlesFolder.add(config, 'particleVelocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
 		particlesFolder.add(config, 'particleVelocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
+	}
+
+	function initParticle(p) {
+		// Inject particles from the centre of the left side face of the box
+		p.position.x = -box.geometry.parameters.width / 2;
+		p.position.y = config.boxHeight / 2 * config.tubeVerticalDisplacement;
+
+		p.velocity = getRandomVelocity();
+
+		p.visible = false; // Show the particles later, in batches
+
+		p.isInROI = false; // Inside the region of influence
+		p.isInTarget = false; // Inside the target sphere
+
+		return p;
+	}
+
+	function addParticlesToScene(count) {
+		for (let i = 0; i < count; i++) {
+			let p = initParticle(new THREE.Mesh(particleGeometry, particleMaterial));
+
+			particles.push(p);
+
+			scene.add(p);
+		}
+	}
+
+	function computeParticleBatches() {
+		let batch = [];
+		for (let i = 0; i < config.particleCount; i++) {
+			batch.push(particles[i]);
+
+			if (batch.length == config.particleBatchSize) {
+				particleBatches.push(batch);
+				batch = [];
+			}
+		}
+
+		if (batch.length > 0) {
+			particleBatches.push(batch);
+		}
 	}
 
 	function init() {
@@ -320,34 +361,13 @@
 		outputTube.add(outputTubeEdges);
 		scene.add(outputTube);
 
-		// Create particles
-		let geometry = new THREE.SphereBufferGeometry(SCENE_SCALE * config.particleSize, 32, 32);
-		let material = new THREE.MeshBasicMaterial({
+		particleGeometry = new THREE.SphereBufferGeometry(SCENE_SCALE * config.particleSize, 32, 32);
+		particleMaterial = new THREE.MeshBasicMaterial({
 			color: config.particleColor
 		});
+		addParticlesToScene(config.particleCount);
 
-		for (let batchIndex = 0; batchIndex < ~~(config.particleCount / config.particleBatchSize); batchIndex++) {
-			let batch = [];
-			for (let i = 0; i < config.particleBatchSize; i++) {
-				let particle = new THREE.Mesh(geometry, material);
-				// Inject particles from the centre of the left side face of the box
-				particle.position.x = -box.geometry.parameters.width / 2;
-				particle.position.y = config.boxHeight / 2 * config.tubeVerticalDisplacement;
-
-				particle.velocity = getRandomVelocity();
-
-				particle.visible = false; // Show the particles later, in batches
-
-				particle.isInROI = false; // Inside the region of influence
-				particle.isInTarget = false; // Inside the target sphere
-
-				scene.add(particle);
-
-				batch.push(particle);
-			}
-
-			particleBatches.push(batch);
-		}
+		computeParticleBatches();
 
 		// DirectionalLight is a plane of light which emits from both sides
 		let light = new THREE.DirectionalLight(new THREE.Color('white'), 0.7);
