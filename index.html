@@ -48,17 +48,30 @@
 
 	let Config = function() {
 		this.scene = {
+			background: {
+				color: getGuiColorString('white'),
+			},
 			box: {
+				color: getGuiColorString('red'),
+				edgesColor: getGuiColorString('red'),
 				height: 1.5,
 				aspectRatio: 0.6,
 			},
+			targetCage: {
+				color: getGuiColorString('gray'),
+			},
+			target: {
+				color: getGuiColorString('gray'),
+			},
 			tubes: {
+				color: getGuiColorString('red'),
+				edgesColor: getGuiColorString('red'),
 				height: 0.2,
 				radius: 0.025,
 				verticalDisplacement: 0.75,
 			},
 			particles: {
-				color: '#' + new THREE.Color('red').getHexString(),
+				color: getGuiColorString('red'),
 				size: 0.0035,
 				count: 1000,
 				batchSize: 10,
@@ -74,13 +87,16 @@
 	let scene, camera, renderer, controls, stats, gui, config;
 
 	// Scene objects
-	let box, regionOfInfluence, target, particles = [], particleBatches = [], visibleParticles = [], currentParticleBatch = 0;
+	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], currentParticleBatch = 0;
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
 
+	function getGuiColorString(color) {
+		return '#' + new THREE.Color(color).getHexString();
+	};
+
 	// Return a random value in interval [-max, -min) \cup [min, max)
-	// TODO: Avoid calling Math.random() twice
 	function getRandomValueWithGap(min, max, positiveOnly = false) {
 		let rand = Math.random();
 
@@ -122,7 +138,7 @@
 	}
 
 	function updateObjects() {
-		regionOfInfluence.rotation.y += 0.005;
+		targetCage.rotation.y += 0.005;
 
 		// Release a new batch of particles
 		if (elapsed % config.scene.particles.batchDelay === 0 && currentParticleBatch < particleBatches.length) {
@@ -143,7 +159,7 @@
 			let p = visibleParticles[i];
 			p.position.add(p.velocity);
 
-			// if (regionOfInfluenceSphere.containsPoint(p.position)) {
+			// if (targetCageSphere.containsPoint(p.position)) {
 			// 	p.isInROI = true;
 			// }
 
@@ -169,7 +185,21 @@
 		elapsed += 1;
 	}
 
-	function adjustParticleColor() {
+	function adjustColors() {
+		scene.background = new THREE.Color(config.scene.background.color);
+
+		box.material.color.set(config.scene.box.color);
+		boxEdges.material.color.set(config.scene.box.edgesColor);
+
+		targetCage.material.color.set(config.scene.targetCage.color);
+
+		target.material.color.set(config.scene.target.color);
+
+		inputTube.material.color.set(config.scene.tubes.color);
+		inputTubeEdges.material.color.set(config.scene.tubes.edgesColor);
+		outputTube.material.color.set(config.scene.tubes.color);
+		outputTubeEdges.material.color.set(config.scene.tubes.edgesColor);
+
 		for (let i = 0; i < particleBatches.length; i++) {
 			for (let j = 0; j < particleBatches[i].length; j++) {
 				particleBatches[i][j].material.color.set(config.scene.particles.color);
@@ -177,7 +207,7 @@
 		}
 	}
 
-	function adjustParticleSize() {
+	function adjustParticlesSize() {
 		console.log("TODO adjustParticleSize");
 	}
 
@@ -211,18 +241,31 @@
 		let sceneFolder = gui.addFolder('Scene');
 		sceneFolder.open();
 
+		let backgroundFolder = sceneFolder.addFolder('Background');
+		backgroundFolder.addColor(config.scene.background, 'color').onChange(adjustColors);
+
 		let boxFolder = sceneFolder.addFolder('Box');
+		boxFolder.addColor(config.scene.box, 'color').onChange(adjustColors);
+		boxFolder.addColor(config.scene.box, 'edgesColor').onChange(adjustColors);
 		boxFolder.add(config.scene.box, 'height', 1, 2).onFinishChange(resetAnimation);
 		boxFolder.add(config.scene.box, 'aspectRatio', 0.3, 1).onFinishChange(resetAnimation);
 
+		let targetCageFolder = sceneFolder.addFolder('Target Cage');
+		targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
+
+		let targetFolder = sceneFolder.addFolder('Target');
+		targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
+
 		let tubesFolder = sceneFolder.addFolder('Tubes');
+		tubesFolder.addColor(config.scene.tubes, 'color').onChange(adjustColors);
+		tubesFolder.addColor(config.scene.tubes, 'edgesColor').onChange(adjustColors);
 		tubesFolder.add(config.scene.tubes, 'height', 0.1, 0.5).onFinishChange(resetAnimation);
 		tubesFolder.add(config.scene.tubes, 'radius', 0.01, 0.05).onFinishChange(resetAnimation);
 		tubesFolder.add(config.scene.tubes, 'verticalDisplacement', 0.1, 0.9).onFinishChange(resetAnimation);
 
 		let particlesFolder = sceneFolder.addFolder('Particles');
-		particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustParticleColor);
-		particlesFolder.add(config.scene.particles, 'size', 0.001, 0.01).onChange(adjustParticleSize);
+		particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustColors);
+		particlesFolder.add(config.scene.particles, 'size', 0.001, 0.01).onChange(adjustParticlesSize);
 		particlesFolder.add(config.scene.particles, 'count', 1, 3000).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'batchSize', 1, 100).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'batchDelay', 5, 40).step(1).onFinishChange(resetAnimation);
@@ -282,7 +325,7 @@
 		config = new Config();
 
 		scene = new THREE.Scene();
-		scene.background = new THREE.Color('white')
+		scene.background = new THREE.Color(config.scene.background.color);
 
 		renderer = new THREE.WebGLRenderer({ antialias: true });
 		renderer.setPixelRatio(window.devicePixelRatio);
@@ -313,25 +356,25 @@
 
 		box = new THREE.Mesh(
 			new THREE.BoxBufferGeometry(config.scene.box.aspectRatio * SCENE_SCALE, config.scene.box.height * SCENE_SCALE, config.scene.box.aspectRatio * SCENE_SCALE),
-			new THREE.MeshBasicMaterial({ color: new THREE.Color('red'), transparent: true, opacity: 0.1, depthTest: false }),
+			new THREE.MeshBasicMaterial({ color: config.scene.box.color, transparent: true, opacity: 0.1, depthTest: false }),
 		);
-		let boxEdges = new THREE.LineSegments(
+		boxEdges = new THREE.LineSegments(
 			new THREE.EdgesGeometry(box.geometry), // or WireframeGeometry
-			new THREE.LineBasicMaterial({ color: new THREE.Color('red') }),
+			new THREE.LineBasicMaterial({ color: config.scene.box.edgesColor }),
 		);
 		box.add(boxEdges);
 		scene.add(box);
 
-		regionOfInfluence = new THREE.Mesh(
+		targetCage = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(SCENE_SCALE * 0.2),
-			new THREE.MeshBasicMaterial({ color: new THREE.Color('gray'), wireframe: true }),
+			new THREE.MeshBasicMaterial({ color: config.scene.targetCage.color, wireframe: true }),
 		);
-		box.add(regionOfInfluence);
+		box.add(targetCage);
 
 		target = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(SCENE_SCALE * 0.1, 30, 30),
 			new THREE.MeshPhongMaterial ({
-				color: new THREE.Color('gray'),
+				color: config.scene.target.color,
 				shininess: 30, // Default 30
 				// emissive: new THREE.Color('springgreen'),
 				// emissiveIntensity: 0.15,
@@ -342,34 +385,34 @@
 
 		target.geometry.computeBoundingSphere();
 
-		regionOfInfluence.add(target);
+		targetCage.add(target);
 
-		let inputTube = new THREE.Mesh(
+		inputTube = new THREE.Mesh(
 			new THREE.CylinderBufferGeometry(config.scene.tubes.radius, config.scene.tubes.radius, config.scene.tubes.height, 8, 1, false, 0.0, Math.PI * 2),
-			new THREE.MeshBasicMaterial({ color: new THREE.Color('red'), transparent: true, opacity: 0.5 }),
+			new THREE.MeshBasicMaterial({ color: config.scene.tubes.color, transparent: true, opacity: 0.5 }),
 		);
 		inputTube.position.x = -box.geometry.parameters.width / 2 - config.scene.tubes.height / 2;
 		inputTube.position.y = config.scene.box.height / 2 * config.scene.tubes.verticalDisplacement;
 		inputTube.rotation.x = Math.PI / 2;
 		inputTube.rotation.z = Math.PI / 2;
-		let inputTubeEdges = new THREE.LineSegments(
+		inputTubeEdges = new THREE.LineSegments(
 			new THREE.WireframeGeometry(inputTube.geometry), // or EdgesGeometry
-			new THREE.LineBasicMaterial({ color: new THREE.Color('red') }),
+			new THREE.LineBasicMaterial({ color: config.scene.tubes.color }),
 		);
 		inputTube.add(inputTubeEdges);
 		scene.add(inputTube);
 
-		let outputTube = new THREE.Mesh(
+		outputTube = new THREE.Mesh(
 			new THREE.CylinderBufferGeometry(config.scene.tubes.radius, config.scene.tubes.radius, config.scene.tubes.height, 8, 1, false, 0.0, Math.PI * 2),
-			new THREE.MeshBasicMaterial({ color: new THREE.Color('red'), transparent: true, opacity: 0.5 }),
+			new THREE.MeshBasicMaterial({ color: config.scene.tubes.color, transparent: true, opacity: 0.5 }),
 		);
 		outputTube.position.x = box.geometry.parameters.width / 2 + config.scene.tubes.height / 2;
 		outputTube.position.y = -config.scene.box.height / 2 * config.scene.tubes.verticalDisplacement;
 		outputTube.rotation.x = Math.PI / 2;
 		outputTube.rotation.z = Math.PI / 2;
-		let outputTubeEdges = new THREE.LineSegments(
+		outputTubeEdges = new THREE.LineSegments(
 			new THREE.WireframeGeometry(outputTube.geometry), // or EdgesGeometry
-			new THREE.LineBasicMaterial({ color: new THREE.Color('red') })
+			new THREE.LineBasicMaterial({ color: config.scene.tubes.color })
 		);
 		outputTube.add(outputTubeEdges);
 		scene.add(outputTube);
