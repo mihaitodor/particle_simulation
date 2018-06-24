@@ -45,6 +45,7 @@
 	console.clear();
 
 	const SCENE_SCALE = 1;
+	const PARTICLE_RADIUS = SCENE_SCALE * 0.0035;
 
 	let Config = function() {
 		this.scene = {
@@ -72,7 +73,7 @@
 			},
 			particles: {
 				color: getGuiColorString('red'),
-				size: 0.0035,
+				scale: 1,
 				count: 1000,
 				batchSize: 10,
 				batchDelay: 15,
@@ -207,8 +208,11 @@
 		}
 	}
 
-	function adjustParticlesSize() {
-		console.log("TODO adjustParticleSize");
+	function adjustParticlesScale() {
+		//let scale = PARTICLE_RADIUS * config.scene.particles.scale;
+		for (let i = 0; i < particles.length; i++) {
+			particles[i].scale.set(config.scene.particles.scale, config.scene.particles.scale, config.scene.particles.scale);
+		}
 	}
 
 	function resetAnimation() {
@@ -265,7 +269,7 @@
 
 		let particlesFolder = sceneFolder.addFolder('Particles');
 		particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustColors);
-		particlesFolder.add(config.scene.particles, 'size', 0.001, 0.01).onChange(adjustParticlesSize);
+		particlesFolder.add(config.scene.particles, 'scale', 0.3, 3).onChange(adjustParticlesScale);
 		particlesFolder.add(config.scene.particles, 'count', 1, 3000).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'batchSize', 1, 100).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'batchDelay', 5, 40).step(1).onFinishChange(resetAnimation);
@@ -291,7 +295,7 @@
 	}
 
 	function addParticlesToScene(count) {
-		let geometry = new THREE.SphereBufferGeometry(SCENE_SCALE * config.scene.particles.size, 32, 32);
+		let geometry = new THREE.SphereBufferGeometry(PARTICLE_RADIUS, 32, 32);
 		let material = new THREE.MeshBasicMaterial({
 			color: config.scene.particles.color
 		});
