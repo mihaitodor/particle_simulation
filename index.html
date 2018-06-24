@@ -45,6 +45,8 @@
 	console.clear();
 
 	const SCENE_SCALE = 1;
+	const BOX_HEIGHT = 1.5;
+	const BOX_ASPECT_RATIO = 0.6;
 	const PARTICLE_RADIUS = SCENE_SCALE * 0.0035;
 
 	let Config = function() {
@@ -55,8 +57,6 @@
 			box: {
 				color: getGuiColorString('red'),
 				edgesColor: getGuiColorString('red'),
-				height: 1.5,
-				aspectRatio: 0.6,
 			},
 			targetCage: {
 				color: getGuiColorString('gray'),
@@ -257,8 +257,6 @@
 		let boxFolder = sceneFolder.addFolder('Box');
 		boxFolder.addColor(config.scene.box, 'color').onChange(adjustColors);
 		boxFolder.addColor(config.scene.box, 'edgesColor').onChange(adjustColors);
-		boxFolder.add(config.scene.box, 'height', 1, 2).onFinishChange(resetAnimation);
-		boxFolder.add(config.scene.box, 'aspectRatio', 0.3, 1).onFinishChange(resetAnimation);
 
 		let targetCageFolder = sceneFolder.addFolder('Target Cage');
 		targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
@@ -289,7 +287,7 @@
 	function initParticle(p) {
 		// Inject particles from the centre of the left side face of the box
 		p.position.x = -box.geometry.parameters.width / 2;
-		p.position.y = config.scene.box.height / 2 * config.scene.tubes.verticalDisplacement;
+		p.position.y = BOX_HEIGHT / 2 * config.scene.tubes.verticalDisplacement;
 		p.position.z = 0;
 
 		p.velocity = getRandomVelocity();
@@ -367,7 +365,7 @@
 		//controls.enableZoom = false;
 
 		box = new THREE.Mesh(
-			new THREE.BoxBufferGeometry(config.scene.box.aspectRatio * SCENE_SCALE, config.scene.box.height * SCENE_SCALE, config.scene.box.aspectRatio * SCENE_SCALE),
+			new THREE.BoxBufferGeometry(BOX_ASPECT_RATIO * SCENE_SCALE, BOX_HEIGHT * SCENE_SCALE, BOX_ASPECT_RATIO * SCENE_SCALE),
 			new THREE.MeshBasicMaterial({ color: config.scene.box.color, transparent: true, opacity: 0.1, depthTest: false }),
 		);
 		boxEdges = new THREE.LineSegments(
@@ -404,7 +402,7 @@
 			new THREE.MeshBasicMaterial({ color: config.scene.tubes.color, transparent: true, opacity: 0.5 }),
 		);
 		inputTube.position.x = -box.geometry.parameters.width / 2 - config.scene.tubes.height / 2;
-		inputTube.position.y = config.scene.box.height / 2 * config.scene.tubes.verticalDisplacement;
+		inputTube.position.y = BOX_HEIGHT / 2 * config.scene.tubes.verticalDisplacement;
 		inputTube.rotation.x = Math.PI / 2;
 		inputTube.rotation.z = Math.PI / 2;
 		inputTubeEdges = new THREE.LineSegments(
@@ -419,7 +417,7 @@
 			new THREE.MeshBasicMaterial({ color: config.scene.tubes.color, transparent: true, opacity: 0.5 }),
 		);
 		outputTube.position.x = box.geometry.parameters.width / 2 + config.scene.tubes.height / 2;
-		outputTube.position.y = -config.scene.box.height / 2 * config.scene.tubes.verticalDisplacement;
+		outputTube.position.y = -BOX_HEIGHT / 2 * config.scene.tubes.verticalDisplacement;
 		outputTube.rotation.x = Math.PI / 2;
 		outputTube.rotation.z = Math.PI / 2;
 		outputTubeEdges = new THREE.LineSegments(
