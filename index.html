@@ -186,8 +186,10 @@
 			addParticlesToScene(config.scene.particles.count - particles.length);
 		}
 
-		for (let i = 0; i < visibleParticles.length; i++) {
-			initParticle(visibleParticles[i]);
+		// We need to reset all the particles, since we might still be in the process
+		// of releasing batches
+		for (let i = 0; i < particles.length; i++) {
+			initParticle(particles[i]);
 		}
 
 		visibleParticles = [];
@@ -225,7 +227,6 @@
 		particlesFolder.add(config.scene.particles, 'batchSize', 1, 100).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'batchDelay', 5, 40).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'timeInBody', 100, 3000).onFinishChange(resetAnimation);
-		// TODO: adjust these dynamically?
 		particlesFolder.add(config.scene.particles, 'velocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'velocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
 	}
