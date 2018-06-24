@@ -80,8 +80,10 @@
 				velocityMin: SCENE_SCALE / 1000,
 				velocityMax: SCENE_SCALE / 100,
 				timeInBody: 1000,
-			}
+			},
 		};
+
+		this.pauseAnimation = false;
 	};
 
 	// Handles which need to be accessed when rendering frames
@@ -139,6 +141,10 @@
 	}
 
 	function updateObjects() {
+		if (config.pauseAnimation) {
+			return;
+		}
+
 		targetCage.rotation.y += 0.005;
 
 		// Release a new batch of particles
@@ -276,6 +282,8 @@
 		particlesFolder.add(config.scene.particles, 'timeInBody', 100, 3000).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'velocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'velocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
+
+		gui.add(config, 'pauseAnimation');
 	}
 
 	function initParticle(p) {
