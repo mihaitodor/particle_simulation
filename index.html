@@ -87,7 +87,7 @@
 	};
 
 	// Handles which need to be accessed when rendering frames
-	let scene, camera, renderer, controls, stats, gui, config;
+	let animationFrame, scene, camera, renderer, controls, stats, gui, config;
 
 	// Scene objects
 	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], currentParticleBatch = 0;
@@ -181,7 +181,7 @@
 	}
 
 	function renderLoop() {
-		requestAnimationFrame(renderLoop);
+		animationFrame = window.requestAnimationFrame(renderLoop);
 
 		updateObjects();
 
@@ -222,24 +222,22 @@
 	}
 
 	function resetAnimation() {
-		if (particles.length < config.scene.particles.count) {
-			addParticlesToScene(config.scene.particles.count - particles.length);
-		}
+		// Stop the animation
+		window.cancelAnimationFrame(animationFrame);
 
-		// We need to reset all the particles, since we might still be in the process
-		// of releasing batches
-		for (let i = 0; i < particles.length; i++) {
-			initParticle(particles[i]);
-		}
+		removeSceneObjects();
 
+		// Reset globals. This is super-clumsy and needs refactoring!
+		particles = [];
 		visibleParticles = [];
-
 		particleBatches = [];
 		currentParticleBatch = 0;
+		elapsed = 0;
 
-		computeParticleBatches();
+		initSceneObjects();
 
-		//elapsed = 0; // Probably not useful
+		// Restart the animation
+		renderLoop();
 	}
 
 	function initGUI() {
@@ -364,6 +362,12 @@
 		controls = new THREE.OrbitControls(camera, renderer.domElement);
 		//controls.enableZoom = false;
 
+		initSceneObjects(scene);
+
+		renderLoop();
+	}
+
+	function initSceneObjects() {
 		box = new THREE.Mesh(
 			new THREE.BoxBufferGeometry(BOX_ASPECT_RATIO * SCENE_SCALE, BOX_HEIGHT * SCENE_SCALE, BOX_ASPECT_RATIO * SCENE_SCALE),
 			new THREE.MeshBasicMaterial({ color: config.scene.box.color, transparent: true, opacity: 0.1, depthTest: false }),
@@ -440,9 +444,46 @@
 		// Extra knob to adjust the lights hitting the objects
 		let ambientLight = new THREE.AmbientLight(new THREE.Color('white'), 0.7);
 		scene.add(ambientLight);
-
-		renderLoop();
 	}
+
+	function removeSceneObjects() {
+		while (scene.children.length)
+		{
+			let child = scene.children[0];
+			disposeObject(child);
+			scene.remove(child);
+			child = undefined;
+		}
+
+		renderer.clear();
+	}
+
+	// Code ripped off from here https://github.com/mrdoob/three.js/issues/5175#issuecomment-316744586
+	function disposeObject(obj, unset=false) {
+		if (obj !== null) {
+			for (var i = 0; i < obj.children.length; i++) {
+				disposeObject(obj.children[i], true);
+			}
+
+			if (obj.geometry) {
+				obj.geometry.dispose();
+				obj.geometry = undefined;
+			}
+
+			if (obj.material) {
+				if (obj.material.map) {
+					obj.material.map.dispose();
+					obj.material.map = undefined;
+				}
+				obj.material.dispose();
+				obj.material = undefined;
+			}
+		}
+
+		if (unset) {
+			obj = undefined;
+		}
+	};
 
 </script>
 </head>
