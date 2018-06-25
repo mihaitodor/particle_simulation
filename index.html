@@ -3,34 +3,34 @@
 <html>
 
 <head>
-	<meta charset="UTF-8">
-	<title>Particle Simulation</title>
+<meta charset="UTF-8">
+<title>Particle Simulation</title>
 
 <style>
-	* {
-		margin: 0;
-	}
+* {
+	margin: 0;
+}
 
-	html, body {
-		height: 100%;
-	}
+html, body {
+	height: 100%;
+}
 
-	.container {
-		height: 100%;
-		margin: 0px auto;
-		overflow: hidden;
-	}
+.container {
+	height: 100%;
+	margin: 0px auto;
+	overflow: hidden;
+}
 
-	#animation {
-		height: 100%;
-		width: 100%;
-	}
+#animation {
+	height: 100%;
+	width: 100%;
+}
 
-	canvas {
-		display: block; /* The default display, inline, would add small margin below the canvas */
-		height: 100%;
-		width: 100%;
-	}
+canvas {
+	display: block; /* The default display, inline, would add small margin below the canvas */
+	height: 100%;
+	width: 100%;
+}
 </style>
 
 <script src="js/three.js-r93/three.min.js"></script>
@@ -278,7 +278,7 @@
 		particlesFolder.add(config.scene.particles, 'velocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'velocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
 
-		gui.add(config, 'pauseAnimation');
+		gui.add(config, 'pauseAnimation').name('Pause animation');;
 	}
 
 	function initParticle(p) {
