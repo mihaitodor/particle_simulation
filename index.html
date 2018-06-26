@@ -313,7 +313,20 @@ canvas {
 		particlesFolder.add(config.scene.particles, 'velocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'velocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
 
-		gui.add(config, 'pauseAnimation').name('Pause animation');;
+		gui.add(config, 'pauseAnimation').name('Pause animation');
+		gui.add(
+			{
+				toggle: function(){
+					let c = document.getElementById('chart');
+					if (!c.style.visibility || c.style.visibility == 'visible') {
+						c.style.visibility = 'hidden';
+					} else {
+						c.style.visibility = 'visible';
+					}
+				},
+			},
+			'toggle',
+			).name('Toggle chart');
 	}
 
 	function initParticle(p) {
