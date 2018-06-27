@@ -211,16 +211,6 @@ canvas {
 			handleBoxWallColisions(p);
 		}
 
-		// Add datapoints to chart
-		if (elapsed % config.chart.sampleInterval == 0) {
-			chart.flow({
-				columns: [
-					['particles', particlesInTarget],
-				],
-				length: 0,
-			});
-		}
-
 		// Handle target glow
 		target.material.emissiveIntensity = config.scene.target.emissiveIntensityMax / config.scene.particles.count * particlesInTarget;
 
@@ -250,6 +240,16 @@ canvas {
 		for (let i = 0; i < excretedParticles.length; i++) {
 			let p = excretedParticles[i];
 			p.position.add(p.velocity);
+		}
+
+		// Add datapoints to chart
+		if (elapsed % config.chart.sampleInterval == 0) {
+			chart.flow({
+				columns: [
+					['particles', particlesInTarget],
+				],
+				length: 0,
+			});
 		}
 	}
 
