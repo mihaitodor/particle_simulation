@@ -76,6 +76,9 @@ canvas {
 			},
 			target: {
 				color: getGuiColorString('gray'),
+				shininess: 30,
+				emissiveColor: getGuiColorString('springgreen'),
+				emissiveIntensityMax: 1,
 			},
 			tubes: {
 				color: getGuiColorString('red'),
@@ -215,6 +218,9 @@ canvas {
 			});
 		}
 
+		// Handle target glow
+		target.material.emissiveIntensity = config.scene.target.emissiveIntensityMax / config.scene.particles.count * particlesInTarget;
+
 		// Handle excretion
 		if (elapsed > config.excretion.initialDelay && elapsed % config.excretion.delay === 0) {
 			let count = config.excretion.rate < visibleParticles.length ? config.excretion.rate : visibleParticles.length;
@@ -265,6 +271,7 @@ canvas {
 		targetCage.material.color.set(config.scene.targetCage.color);
 
 		target.material.color.set(config.scene.target.color);
+		target.material.emissive.set(config.scene.target.emissiveColor);
 
 		inputTube.material.color.set(config.scene.tubes.color);
 		inputTubeEdges.material.color.set(config.scene.tubes.edgesColor);
@@ -283,6 +290,10 @@ canvas {
 		for (let i = 0; i < particles.length; i++) {
 			particles[i].scale.set(config.scene.particles.scale, config.scene.particles.scale, config.scene.particles.scale);
 		}
+	}
+
+	function adjustTargetShininess() {
+		target.material.shininess = config.scene.target.shininess;
 	}
 
 	function toggleChartPoints() {
@@ -338,6 +349,9 @@ canvas {
 
 		let targetFolder = sceneFolder.addFolder('Target');
 		targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
+		targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
+		targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
+		targetFolder.add(config.scene.target, 'emissiveIntensityMax', 0.2, 2).name('glowMaxValue').onChange(resetAnimation);
 
 		let tubesFolder = sceneFolder.addFolder('Tubes');
 		tubesFolder.addColor(config.scene.tubes, 'color').onChange(adjustColors);
@@ -533,9 +547,9 @@ canvas {
 			new THREE.SphereBufferGeometry(SCENE_SCALE * 0.1, 30, 30),
 			new THREE.MeshPhongMaterial ({
 				color: config.scene.target.color,
-				shininess: 30, // Default 30
-				// emissive: new THREE.Color('springgreen'),
-				// emissiveIntensity: 0.15,
+				shininess: config.scene.target.shininess,
+				emissive: config.scene.target.emissiveColor,
+				emissiveIntensity: 0, // Will be updated when particles start to enter the target
 				transparent: true,
 				opacity: 0.8,
 			})
