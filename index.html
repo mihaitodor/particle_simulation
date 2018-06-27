@@ -317,12 +317,8 @@ canvas {
 
 		initSceneObjects();
 
-		chart.unload();
-		chart.load({
-			columns: [
-				['particles', 0],
-			],
-		});
+		chart.destroy();
+		initChart();
 
 		// Restart the animation
 		renderLoop();
@@ -451,6 +447,10 @@ canvas {
 				x: {
 					min: 0,
 					padding: {left: 0, right: 0},
+					tick: {
+						// Don't show a tick line for each datapoint
+						fit: false,
+					},
 					label: {
 						text: 'Time',
 						position: "outer-right",
