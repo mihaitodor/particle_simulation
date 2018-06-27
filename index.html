@@ -96,6 +96,11 @@ canvas {
 			},
 		};
 
+		this.chart = {
+			showPoints: false,
+			sampleInterval: 60,
+		};
+
 		this.pauseAnimation = false;
 	};
 
@@ -196,7 +201,7 @@ canvas {
 		}
 
 		// Add datapoints to chart
-		if (elapsed % 60 == 0) {
+		if (elapsed % config.chart.sampleInterval == 0) {
 			chart.flow({
 				columns: [
 					['particles', particlesInTarget],
@@ -245,6 +250,10 @@ canvas {
 		for (let i = 0; i < particles.length; i++) {
 			particles[i].scale.set(config.scene.particles.scale, config.scene.particles.scale, config.scene.particles.scale);
 		}
+	}
+
+	function toggleChartPoints() {
+		chart.internal.config.point_show = config.chart.showPoints;
 	}
 
 	function resetAnimation() {
@@ -312,6 +321,10 @@ canvas {
 		particlesFolder.add(config.scene.particles, 'timeInBody', 100, 3000).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'velocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'velocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
+
+		let chartFolder = sceneFolder.addFolder('Chart');
+		chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
+		chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
 
 		gui.add(config, 'pauseAnimation').name('Pause animation');
 		gui.add(
@@ -387,7 +400,7 @@ canvas {
 					min: 0,
 					padding: {left: 0, right: 0},
 					label: {
-						text: 'Time (s)',
+						text: 'Time',
 						position: "outer-right",
 					},
 				},
@@ -410,7 +423,7 @@ canvas {
 				},
 			},
 			point: {
-				show: false,
+				show: config.chart.showPoints,
 			},
 			data: {
 				columns: [
