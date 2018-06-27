@@ -327,7 +327,9 @@ canvas {
 	function initGUI() {
 		gui = new dat.GUI();
 
-		// Save the config to localStorage
+		// Show the save menu
+		// Note that changing presets will fire the event handlers for all the configuration options
+		// which reloads all the UI items multiple times quickly via resetAnimation. This is not ideal.
 		gui.remember(config);
 
 		let sceneFolder = gui.addFolder('Scene');
