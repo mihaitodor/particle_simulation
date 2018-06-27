@@ -92,13 +92,18 @@ canvas {
 				batchDelay: 15,
 				velocityMin: SCENE_SCALE / 1000,
 				velocityMax: SCENE_SCALE / 100,
-				timeInBody: 1000,
 			},
 		};
 
 		this.chart = {
 			showPoints: false,
 			sampleInterval: 60,
+		};
+
+		this.excretion = {
+			initialDelay: 360,
+			rate: 5,
+			delay: 25,
 		};
 
 		this.pauseAnimation = false;
@@ -108,7 +113,7 @@ canvas {
 	let animationFrame, scene, camera, renderer, controls, stats, gui, chart, config;
 
 	// Scene objects
-	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], currentParticleBatch = 0, particlesInTarget = 0;
+	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], excretedParticles = [], currentParticleBatch = 0, particlesInTarget = 0;
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
@@ -209,6 +214,34 @@ canvas {
 				length: 0,
 			});
 		}
+
+		// Handle excretion
+		if (elapsed > config.excretion.initialDelay && elapsed % config.excretion.delay === 0) {
+			let count = config.excretion.rate < visibleParticles.length ? config.excretion.rate : visibleParticles.length;
+			for (let i = 0; i < count; i++) {
+				let p = visibleParticles.shift();
+
+				if (p.isInTarget) {
+					p.isInTarget = false;
+					particlesInTarget--;
+				}
+
+				//p.position.x = box.geometry.parameters.width / 2;
+				p.position.x = box.geometry.parameters.width / 2 + config.scene.tubes.height;
+				p.position.y = -BOX_HEIGHT / 2 * config.scene.tubes.verticalDisplacement;
+				p.position.z = 0;
+
+				p.velocity = getRandomVelocity();
+
+				excretedParticles.push(p);
+			}
+		}
+
+		// Animate excreted particles
+		for (let i = 0; i < excretedParticles.length; i++) {
+			let p = excretedParticles[i];
+			p.position.add(p.velocity);
+		}
 	}
 
 	function renderLoop() {
@@ -265,6 +298,7 @@ canvas {
 		// Reset globals. This is super-clumsy and needs refactoring!
 		particles = [];
 		visibleParticles = [];
+		excretedParticles = [];
 		particleBatches = [];
 		currentParticleBatch = 0;
 		particlesInTarget = 0;
@@ -317,10 +351,14 @@ canvas {
 		particlesFolder.add(config.scene.particles, 'scale', 0.3, 3).onChange(adjustParticlesScale);
 		particlesFolder.add(config.scene.particles, 'count', 1, 3000).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'batchSize', 1, 100).step(1).onFinishChange(resetAnimation);
-		particlesFolder.add(config.scene.particles, 'batchDelay', 5, 40).step(1).onFinishChange(resetAnimation);
-		particlesFolder.add(config.scene.particles, 'timeInBody', 100, 3000).onFinishChange(resetAnimation);
+		particlesFolder.add(config.scene.particles, 'batchDelay', 5, 120).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'velocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'velocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
+
+		let excretionFolder = sceneFolder.addFolder('Excretion');
+		excretionFolder.add(config.excretion, 'initialDelay', 120, 600).step(1).onFinishChange(resetAnimation);
+		excretionFolder.add(config.excretion, 'rate', 1, 100).step(1);
+		excretionFolder.add(config.excretion, 'delay', 5, 120).step(1);
 
 		let chartFolder = sceneFolder.addFolder('Chart');
 		chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
