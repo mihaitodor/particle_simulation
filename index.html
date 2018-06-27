@@ -374,7 +374,6 @@ canvas {
 		chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
 		chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
 
-		gui.add(config, 'pauseAnimation').name('Pause animation');
 		gui.add(
 			{
 				toggle: function(){
@@ -387,7 +386,18 @@ canvas {
 				},
 			},
 			'toggle',
-			).name('Toggle chart');
+		).name('Toggle chart');
+
+		gui.add(config, 'pauseAnimation').name('Pause animation');
+
+		gui.add(
+			{
+				reset: function(){
+					resetAnimation();
+				},
+			},
+			'reset',
+		).name('Reset animation');
 	}
 
 	function initParticle(p) {
