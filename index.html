@@ -67,16 +67,19 @@ canvas {
 			box: {
 				color: getGuiColorString('red'),
 				edgesColor: getGuiColorString('red'),
+				opacity: 0.3,
 				width: 0.6,
 				height: 1.5,
 				depth: 0.6,
 			},
 			targetCage: {
 				color: getGuiColorString('gray'),
+				opacity: 0.3,
 				radius: 0.2,
 			},
 			target: {
 				color: getGuiColorString('red'),
+				opacity: 0.3,
 				radius: 0.1,
 				shininess: 30,
 				emissiveColor: getGuiColorString('springgreen'),
@@ -294,6 +297,12 @@ canvas {
 		}
 	}
 
+	function adjustOpacities() {
+		box.material.opacity = config.scene.box.opacity;
+		targetCage.material.opacity = config.scene.targetCage.opacity;
+		target.material.opacity = config.scene.target.opacity;
+	}
+
 	function adjustTargetShininess() {
 		target.material.shininess = config.scene.target.shininess;
 	}
@@ -343,16 +352,19 @@ canvas {
 		let boxFolder = sceneFolder.addFolder('Box');
 		boxFolder.addColor(config.scene.box, 'color').onChange(adjustColors);
 		boxFolder.addColor(config.scene.box, 'edgesColor').onChange(adjustColors);
+		boxFolder.add(config.scene.box, 'opacity', 0.1, 1).onChange(adjustOpacities);
 		boxFolder.add(config.scene.box, 'width', 0.3, 2).onFinishChange(resetAnimation);
 		boxFolder.add(config.scene.box, 'height', 0.3, 2).onFinishChange(resetAnimation);
 		boxFolder.add(config.scene.box, 'depth', 0.3, 2).onFinishChange(resetAnimation);
 
 		let targetCageFolder = sceneFolder.addFolder('Target Cage');
 		targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
+		targetCageFolder.add(config.scene.targetCage, 'opacity', 0.1, 1).onChange(adjustOpacities);
 		targetCageFolder.add(config.scene.targetCage, 'radius', 0.1, 0.5).onFinishChange(resetAnimation);
 
 		let targetFolder = sceneFolder.addFolder('Target');
 		targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
+		targetFolder.add(config.scene.target, 'opacity', 0.1, 1).onChange(adjustOpacities);
 		targetFolder.add(config.scene.target, 'radius', 0.05, 0.5).onFinishChange(resetAnimation);
 		targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
 		targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
@@ -548,7 +560,12 @@ canvas {
 	function initSceneObjects() {
 		box = new THREE.Mesh(
 			new THREE.BoxBufferGeometry(config.scene.box.width, config.scene.box.height, config.scene.box.depth),
-			new THREE.MeshBasicMaterial({ color: config.scene.box.color, transparent: true, opacity: 0.1, depthTest: false }),
+			new THREE.MeshBasicMaterial({
+				color: config.scene.box.color,
+				transparent: true,
+				opacity: config.scene.box.opacity,
+				depthTest: false,
+			}),
 		);
 		boxEdges = new THREE.LineSegments(
 			new THREE.EdgesGeometry(box.geometry), // or WireframeGeometry
@@ -559,7 +576,12 @@ canvas {
 
 		targetCage = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(config.scene.targetCage.radius),
-			new THREE.MeshBasicMaterial({ color: config.scene.targetCage.color, wireframe: true }),
+			new THREE.MeshBasicMaterial({
+				color: config.scene.targetCage.color,
+				wireframe: true,
+				transparent: true,
+				opacity: config.scene.targetCage.opacity,
+			}),
 		);
 		box.add(targetCage);
 
@@ -571,7 +593,7 @@ canvas {
 				emissive: config.scene.target.emissiveColor,
 				emissiveIntensity: 0, // Will be updated when particles start to enter the target
 				transparent: true,
-				opacity: 0.8,
+				opacity: config.scene.target.opacity,
 			})
 		);
 
