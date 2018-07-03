@@ -9,7 +9,7 @@
 <script src="js/three.js-r93/three.min.js"></script>
 <script src="js/OrbitControls.js"></script>
 <script src="js/stats.js-r17/stats.min.js"></script>
-<script src="js/dat.gui-0.6.5/dat.gui.min.js"></script>
+<script src="js/dat.gui-0.7.2/dat.gui.min.js"></script>
 <script src="js/d3-5.5.0/d3.min.js" charset="utf-8"></script>
 <script src="js/c3-0.6.2/c3.min.js"></script>
 
@@ -529,11 +529,6 @@ canvas {
 		let animationContainer = document.getElementById('animation');
 		animationContainer.appendChild(renderer.domElement);
 
-		stats = new Stats();
-		animationContainer.appendChild(stats.dom);
-
-		initGUI();
-
 		let bbClientRect = renderer.domElement.getBoundingClientRect();
 		// Use the default values from the PerspectiveCamera constructor
 		camera = new THREE.PerspectiveCamera(50, bbClientRect.width / bbClientRect.height, 0.1, 2000);
@@ -550,7 +545,12 @@ canvas {
 		controls = new THREE.OrbitControls(camera, renderer.domElement);
 		//controls.enableZoom = false;
 
+		stats = new Stats();
+		animationContainer.appendChild(stats.dom);
+
 		initSceneObjects(scene);
+
+		initGUI();
 
 		initChart();
 
