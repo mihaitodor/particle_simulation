@@ -249,7 +249,8 @@ canvas {
 		if (elapsed % config.chart.sampleInterval == 0) {
 			chart.flow({
 				columns: [
-					['particles', particlesInTarget],
+					['body', visibleParticles.length / config.scene.particles.count * 100],
+					['target', particlesInTarget / config.scene.particles.count * 100],
 				],
 				length: 0,
 			});
@@ -489,9 +490,6 @@ canvas {
 	function initChart() {
 		chart = c3.generate({
 			bindto: '#chart',
-			legend: {
-				show: false,
-			},
 			axis: {
 				x: {
 					min: 0,
@@ -507,20 +505,20 @@ canvas {
 				},
 				y: {
 					min: 0,
-					max: config.scene.particles.count,
+					max: 100,
 					padding: {bottom: 0, top: 0},
 					label: {
-						text: 'Particles',
+						text: 'Particles %',
 						position: 'outer-top',
 					},
 				},
 			},
 			grid: {
 				x: {
-					show: true
+					show: true,
 				},
 				y: {
-					show: true
+					show: true,
 				},
 			},
 			point: {
@@ -528,8 +526,16 @@ canvas {
 			},
 			data: {
 				columns: [
-					['particles', 0],
+					['body',   0],
+					['target', 0],
 				],
+				names: {
+					body:   '% in box',
+					target: '% in target',
+				}
+			},
+			legend: {
+				position: 'inset',
 			},
 		});
 	}
