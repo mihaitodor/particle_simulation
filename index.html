@@ -335,13 +335,30 @@ canvas {
 		renderLoop();
 	}
 
-	function initGUI() {
-		gui = new dat.GUI();
-
-		// Show the save menu
+	function rememberGUISettings() {
+		// Invoking gui.remember() at least once will show the save menu.
 		// Note that changing presets will fire the event handlers for all the configuration options
 		// which reloads all the UI items multiple times quickly via resetAnimation. This is not ideal.
 		gui.remember(config);
+
+		// Descend recursively through all the subobjects of the config and inform the GUI of their existence.
+		let descender = (obj) => {
+			Object.keys(obj).forEach(key => {
+				if (typeof obj[key] === "object") {
+					gui.remember(obj[key]);
+
+					descender(obj[key]);
+				}
+			});
+		};
+
+		descender(config);
+	}
+
+	function initGUI() {
+		gui = new dat.GUI();
+
+		rememberGUISettings();
 
 		let sceneFolder = gui.addFolder('Scene');
 		sceneFolder.open();
