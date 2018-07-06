@@ -37,6 +37,12 @@ html, body {
 	width: 100%;
 }
 
+#animation canvas {
+	display: block; /* The default display, inline, would add small margin below the canvas */
+	height: 100%;
+	width: 100%;
+}
+
 .chart-container {
 	position: absolute;
 	width: 35%;
@@ -44,18 +50,10 @@ html, body {
 	left: 0;
 	bottom: 0;
 }
-
-canvas {
-	display: block; /* The default display, inline, would add small margin below the canvas */
-	height: 100%;
-	width: 100%;
-}
 </style>
 
 <script>
 	"use strict";
-
-	console.clear();
 
 	const SCENE_SCALE = 1;
 
@@ -356,6 +354,18 @@ canvas {
 		descender(config);
 	}
 
+	function toggleChart() {
+		// For some reason `chart.toggle('', {withLegend: true})` doesn't work :(
+		let c = document.getElementById('chart');
+		if (!c.style.visibility || c.style.visibility == 'visible') {
+			chart.hide('', {withLegend: true});
+			c.style.visibility = 'hidden';
+		} else {
+			chart.show('', {withLegend: true});
+			c.style.visibility = 'visible';
+		}
+	}
+
 	function initGUI() {
 		gui = new dat.GUI();
 
@@ -414,30 +424,11 @@ canvas {
 		chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
 		chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
 
-		gui.add(
-			{
-				toggle: function(){
-					let c = document.getElementById('chart');
-					if (!c.style.visibility || c.style.visibility == 'visible') {
-						c.style.visibility = 'hidden';
-					} else {
-						c.style.visibility = 'visible';
-					}
-				},
-			},
-			'toggle',
-		).name('Toggle chart');
+		gui.add({ toggle: toggleChart }, 'toggle').name('Toggle chart');
 
 		gui.add(config, 'pauseAnimation').name('Pause animation');
 
-		gui.add(
-			{
-				reset: function(){
-					resetAnimation();
-				},
-			},
-			'reset',
-		).name('Reset animation');
+		gui.add({ reset: resetAnimation }, 'reset').name('Reset animation');
 	}
 
 	function initParticle(p) {
