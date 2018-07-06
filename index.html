@@ -380,19 +380,19 @@ html, body {
 		let boxFolder = sceneFolder.addFolder('Box');
 		boxFolder.addColor(config.scene.box, 'color').onChange(adjustColors);
 		boxFolder.addColor(config.scene.box, 'edgesColor').onChange(adjustColors);
-		boxFolder.add(config.scene.box, 'opacity', 0.1, 1).onChange(adjustOpacities);
+		boxFolder.add(config.scene.box, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		boxFolder.add(config.scene.box, 'width', 0.3, 2).onFinishChange(resetAnimation);
 		boxFolder.add(config.scene.box, 'height', 0.3, 2).onFinishChange(resetAnimation);
 		boxFolder.add(config.scene.box, 'depth', 0.3, 2).onFinishChange(resetAnimation);
 
 		let targetCageFolder = sceneFolder.addFolder('Target Cage');
 		targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
-		targetCageFolder.add(config.scene.targetCage, 'opacity', 0.1, 1).onChange(adjustOpacities);
+		targetCageFolder.add(config.scene.targetCage, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetCageFolder.add(config.scene.targetCage, 'radius', 0.1, 0.5).onFinishChange(resetAnimation);
 
 		let targetFolder = sceneFolder.addFolder('Target');
 		targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
-		targetFolder.add(config.scene.target, 'opacity', 0.1, 1).onChange(adjustOpacities);
+		targetFolder.add(config.scene.target, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetFolder.add(config.scene.target, 'radius', 0.05, 0.5).onFinishChange(resetAnimation);
 		targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
 		targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
