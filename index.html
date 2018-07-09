@@ -74,11 +74,13 @@ html, body {
 				color: getGuiColorString('gray'),
 				opacity: 0.3,
 				radius: 0.2,
+				viscosity: 0.2,
 			},
 			target: {
 				color: getGuiColorString('red'),
 				opacity: 0.3,
 				radius: 0.1,
+				viscosity: 0.5,
 				shininess: 30,
 				emissiveColor: getGuiColorString('springgreen'),
 				emissiveIntensityMax: 1,
@@ -194,17 +196,22 @@ html, body {
 		// Animate particles
 		for (let i = 0; i < visibleParticles.length; i++) {
 			let p = visibleParticles[i];
-			p.position.add(p.velocity);
 
-			// if (targetCageSphere.containsPoint(p.position)) {
-			// 	p.isInROI = true;
-			// }
-
-			if (p.isInTarget || p.position.distanceTo(target.geometry.boundingSphere.center) < target.geometry.boundingSphere.radius) {
-				if (!p.isInTarget) {
-					p.isInTarget = true;
-					particlesInTarget++;
+			if (targetCage.geometry.boundingSphere.containsPoint(p.position)) {
+				if (target.geometry.boundingSphere.containsPoint(p.position)) {
+					if (!p.isInTarget) {
+						p.isInTarget = true;
+						particlesInTarget++;
+					}
+					p.position.addScaledVector(p.velocity, 1 - config.scene.target.viscosity);
+				} else {
+					p.position.addScaledVector(p.velocity, 1 - config.scene.targetCage.viscosity);
 				}
+			} else {
+				p.position.add(p.velocity);
+			}
+
+			if (p.isInTarget) {
 				handleSphereWallColisions(p);
 				continue;
 			}
@@ -389,11 +396,13 @@ html, body {
 		targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
 		targetCageFolder.add(config.scene.targetCage, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetCageFolder.add(config.scene.targetCage, 'radius', 0.1, 0.5).onFinishChange(resetAnimation);
+		targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9);
 
 		let targetFolder = sceneFolder.addFolder('Target');
 		targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
 		targetFolder.add(config.scene.target, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetFolder.add(config.scene.target, 'radius', 0.05, 0.5).onFinishChange(resetAnimation);
+		targetFolder.add(config.scene.target, 'viscosity', 0, 0.9);
 		targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
 		targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
 		targetFolder.add(config.scene.target, 'emissiveIntensityMax', 0.2, 2).name('glowMaxValue').onChange(resetAnimation);
@@ -597,6 +606,9 @@ html, body {
 				opacity: config.scene.targetCage.opacity,
 			}),
 		);
+
+		targetCage.geometry.computeBoundingSphere();
+
 		box.add(targetCage);
 
 		target = new THREE.Mesh(
