@@ -373,6 +373,14 @@ html, body {
 		}
 	}
 
+	function toggleStats() {
+		if (!stats.dom.style.visibility || stats.dom.style.visibility == 'visible') {
+			stats.dom.style.visibility = "hidden";
+		} else {
+			stats.dom.style.visibility = "visible";
+		}
+	}
+
 	function initGUI() {
 		gui = new dat.GUI();
 
@@ -434,6 +442,8 @@ html, body {
 		chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
 
 		gui.add({ toggle: toggleChart }, 'toggle').name('Toggle chart');
+
+		gui.add({ toggle: toggleStats }, 'toggle').name('Toggle stats');
 
 		gui.add(config, 'pauseAnimation').name('Pause animation');
 
