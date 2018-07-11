@@ -93,7 +93,8 @@ html, body {
 				verticalDisplacement: 0.75,
 			},
 			particles: {
-				color: getGuiColorString('red'),
+				color: getGuiColorString('gray'),
+				colorInTarget: getGuiColorString('red'),
 				radius: 0.0035,
 				scale: 1,
 				count: 1000,
@@ -122,7 +123,7 @@ html, body {
 	let animationFrame, scene, camera, renderer, controls, stats, gui, chart, config;
 
 	// Scene objects
-	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], excretedParticles = [], currentParticleBatch = 0, particlesInTarget = 0;
+	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], particlesInTarget = [], excretedParticles = [], currentParticleBatch = 0;
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
@@ -201,7 +202,8 @@ html, body {
 				if (target.geometry.boundingSphere.containsPoint(p.position)) {
 					if (!p.isInTarget) {
 						p.isInTarget = true;
-						particlesInTarget++;
+						p.material.color.set(config.scene.particles.colorInTarget);
+						particlesInTarget.push(p);
 					}
 					p.position.addScaledVector(p.velocity, 1 - config.scene.target.viscosity);
 				} else {
@@ -220,7 +222,7 @@ html, body {
 		}
 
 		// Handle target glow
-		target.material.emissiveIntensity = config.scene.target.emissiveIntensityMax / config.scene.particles.count * particlesInTarget;
+		target.material.emissiveIntensity = config.scene.target.emissiveIntensityMax / config.scene.particles.count * particlesInTarget.length;
 
 		// Handle excretion
 		if (elapsed > config.excretion.initialDelay && elapsed % config.excretion.delay === 0) {
@@ -230,7 +232,8 @@ html, body {
 
 				if (p.isInTarget) {
 					p.isInTarget = false;
-					particlesInTarget--;
+					//TODO: FIXME when separating excretions
+					//particlesInTarget--;
 				}
 
 				//p.position.x = box.geometry.parameters.width / 2;
@@ -255,7 +258,7 @@ html, body {
 			chart.flow({
 				columns: [
 					['body', visibleParticles.length / config.scene.particles.count * 100],
-					['target', particlesInTarget / config.scene.particles.count * 100],
+					['target', particlesInTarget.length / config.scene.particles.count * 100],
 				],
 				length: 0,
 			});
@@ -292,7 +295,12 @@ html, body {
 
 		for (let i = 0; i < particleBatches.length; i++) {
 			for (let j = 0; j < particleBatches[i].length; j++) {
-				particleBatches[i][j].material.color.set(config.scene.particles.color);
+				let p = particleBatches[i][j];
+				if (p.isInTarget) {
+					p.material.color.set(config.scene.particles.colorInTarget);
+				} else {
+					p.material.color.set(config.scene.particles.color);
+				}
 			}
 		}
 	}
@@ -326,10 +334,10 @@ html, body {
 		// Reset globals. This is super-clumsy and needs refactoring!
 		particles = [];
 		visibleParticles = [];
+		particlesInTarget = [];
 		excretedParticles = [];
 		particleBatches = [];
 		currentParticleBatch = 0;
-		particlesInTarget = 0;
 		elapsed = 0;
 
 		initSceneObjects();
@@ -424,6 +432,7 @@ html, body {
 
 		let particlesFolder = sceneFolder.addFolder('Particles');
 		particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustColors);
+		particlesFolder.addColor(config.scene.particles, 'colorInTarget').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'radius', 0.001, 0.01).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'scale', 0.3, 3).onChange(adjustParticlesScale);
 		particlesFolder.add(config.scene.particles, 'count', 1, 3000).step(1).onFinishChange(resetAnimation);
@@ -468,12 +477,16 @@ html, body {
 
 	function addParticlesToScene(count) {
 		let geometry = new THREE.SphereBufferGeometry(config.scene.particles.radius, 32, 32);
-		let material = new THREE.MeshBasicMaterial({
-			color: config.scene.particles.color
-		});
 
 		for (let i = 0; i < count; i++) {
-			let p = initParticle(new THREE.Mesh(geometry, material));
+			let p = initParticle(
+				new THREE.Mesh(
+					geometry,
+					new THREE.MeshBasicMaterial({
+						color: config.scene.particles.color,
+					}),
+				),
+			);
 
 			particles.push(p);
 
