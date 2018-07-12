@@ -424,7 +424,7 @@ html, body {
 		targetFolder.add(config.scene.target, 'viscosity', 0, 0.9);
 		targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
 		targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
-		targetFolder.add(config.scene.target, 'emissiveIntensityMax', 0.2, 2).name('glowMaxValue').onChange(resetAnimation);
+		targetFolder.add(config.scene.target, 'emissiveIntensityMax', 0.2, 2).name('glowMaxValue').onFinishChange(resetAnimation);
 
 		let tubesFolder = sceneFolder.addFolder('Tubes');
 		tubesFolder.addColor(config.scene.tubes, 'color').onChange(adjustColors);
