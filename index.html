@@ -223,34 +223,29 @@ html, body {
 		for (let i = 0; i < visibleParticles.length; i++) {
 			let p = visibleParticles[i];
 
-			if (targetCage.geometry.boundingSphere.containsPoint(p.position)) {
-				if (target.geometry.boundingSphere.containsPoint(p.position)) {
-					if (!p.isInTarget) {
-						p.isInTarget = true;
-						p.material.color.set(config.scene.particles.colorInTarget);
-						particlesInTarget.push(p);
+			if (target.geometry.boundingSphere.containsPoint(p.position)) {
+				if (!p.isInTarget) {
+					p.isInTarget = true;
+					p.material.color.set(config.scene.particles.colorInTarget);
+					particlesInTarget.push(p);
 
-						// Remove the particle from particlesInBox to simplify excretion
-						particlesInBox.splice(particlesInBox.indexOf(p), 1);
-					}
-					p.position.addScaledVector(p.velocity, 1 - config.scene.target.viscosity);
-				} else {
-					p.position.addScaledVector(p.velocity, 1 - config.scene.targetCage.viscosity);
+					// Remove the particle from particlesInBox to simplify excretion
+					particlesInBox.splice(particlesInBox.indexOf(p), 1);
 				}
+
+				p.position.addScaledVector(p.velocity, 1 - config.scene.target.viscosity);
+
+				handleSphereWallColisions(p);
+
+			} else if (targetCage.geometry.boundingSphere.containsPoint(p.position)) {
+				p.position.addScaledVector(p.velocity, 1 - config.scene.targetCage.viscosity);
 			} else {
 				p.position.add(p.velocity);
-			}
 
-			if (p.isExcreted) {
-				continue;
+				if (!p.isExcreted) {
+					handleBoxWallColisions(p);
+				}
 			}
-
-			if (p.isInTarget) {
-				handleSphereWallColisions(p);
-				continue;
-			}
-
-			handleBoxWallColisions(p);
 		}
 
 		// Handle target glow
