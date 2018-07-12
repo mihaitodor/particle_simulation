@@ -303,14 +303,12 @@ html, body {
 		outputTube.material.color.set(config.scene.tubes.color);
 		outputTubeEdges.material.color.set(config.scene.tubes.edgesColor);
 
-		for (let i = 0; i < particleBatches.length; i++) {
-			for (let j = 0; j < particleBatches[i].length; j++) {
-				let p = particleBatches[i][j];
-				if (p.isInTarget) {
-					p.material.color.set(config.scene.particles.colorInTarget);
-				} else {
-					p.material.color.set(config.scene.particles.color);
-				}
+		for (let i = 0; i < particles.length; i++) {
+			let p = particles[i];
+			if (p.isInTarget) {
+				p.material.color.set(config.scene.particles.colorInTarget);
+			} else {
+				p.material.color.set(config.scene.particles.color);
 			}
 		}
 	}
