@@ -129,7 +129,7 @@ html, body {
 	let animationFrame, scene, camera, renderer, controls, stats, gui, chart, config;
 
 	// Scene objects
-	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], particlesInBox = [], particlesInTarget = [], currentParticleBatch = 0;
+	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], particlesInBox = 0, particlesInTarget = 0, currentParticleBatch = 0;
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
@@ -159,9 +159,9 @@ html, body {
 		);
 	}
 
-	// Check to see if the position of the ball doesn't go past the box wall and
-	// also check to see if it's velocity is less than or greater than 0 so it
-	// doesn't spike past and get stuck by the edge of the wall.
+	// Check to see if the position of the particle doesn't go past the box wall
+	// and also check to see if it's velocity is less than or greater than 0 so
+	// it doesn't spike past and get stuck by the edge of the wall.
 	function handleBoxWallColisions(p) {
 		if(p.position.x >= box.geometry.parameters.width / 2 - p.geometry.parameters.radius && p.velocity.x > 0 || p.position.x <= -box.geometry.parameters.width / 2 + p.geometry.parameters.radius && p.velocity.x < 0)
 			p.velocity.setX(-p.velocity.x);
@@ -179,22 +179,15 @@ html, body {
 		p.velocity = p.velocity.reflect(normal);
 	}
 
-	function handleExcretion(source, initialDelay, delay, rate) {
-		if (elapsed > initialDelay && elapsed % delay === 0) {
-			for (let i = 0; i < (rate < source.length ? rate : source.length); i++) {
-				let p = source.shift();
+	function excreteParticle(p) {
+		p.isInTarget = false;
+		p.isExcreted = true;
 
-				p.isInTarget = false;
-				p.isExcreted = true;
+		p.position.x = box.geometry.parameters.width / 2 + config.scene.tubes.height;
+		p.position.y = -config.scene.box.height / 2 * config.scene.tubes.verticalDisplacement;
+		p.position.z = 0;
 
-				//p.position.x = box.geometry.parameters.width / 2;
-				p.position.x = box.geometry.parameters.width / 2 + config.scene.tubes.height;
-				p.position.y = -config.scene.box.height / 2 * config.scene.tubes.verticalDisplacement;
-				p.position.z = 0;
-
-				p.velocity = getRandomVelocity();
-			}
-		}
+		p.velocity = getRandomVelocity();
 	}
 
 	function updateObjects() {
@@ -213,10 +206,22 @@ html, body {
 				p.visible = true;
 				p.position.add(p.velocity); // Start moving the particles as soon as they become visible
 				visibleParticles.push(p);
-				particlesInBox.push(p);
 			}
 
+			particlesInBox += batch.length;
+
 			currentParticleBatch++;
+		}
+
+		// Set the number of particles that need to be excreted during this iteration.
+		// We might not have that many left, so we handle this case gracefully in the loop below.
+		let particlesToExcreteFromBox = 0;
+		let particlesToExcreteFromTarget = 0;
+		if (elapsed > config.excretion.initialDelay && elapsed % config.excretion.delay === 0) {
+			particlesToExcreteFromBox = config.excretion.rate;
+		}
+		if (elapsed > config.targetExcretion.initialDelay && elapsed % config.targetExcretion.delay === 0) {
+			particlesToExcreteFromTarget = config.targetExcretion.rate;
 		}
 
 		// Animate particles
@@ -227,43 +232,52 @@ html, body {
 				if (!p.isInTarget) {
 					p.isInTarget = true;
 					p.material.color.set(config.scene.particles.colorInTarget);
-					particlesInTarget.push(p);
-
-					// Remove the particle from particlesInBox to simplify excretion
-					particlesInBox.splice(particlesInBox.indexOf(p), 1);
+					particlesInTarget++;
+					particlesInBox--;
 				}
 
 				p.position.addScaledVector(p.velocity, 1 - config.scene.target.viscosity);
 
 				handleSphereWallColisions(p);
 
-			} else if (targetCage.geometry.boundingSphere.containsPoint(p.position)) {
-				p.position.addScaledVector(p.velocity, 1 - config.scene.targetCage.viscosity);
+				if (particlesToExcreteFromTarget > 0) {
+					excreteParticle(p);
+
+					particlesInTarget--;
+
+					particlesToExcreteFromTarget--;
+				}
 			} else {
-				p.position.add(p.velocity);
+				if (targetCage.geometry.boundingSphere.containsPoint(p.position)) {
+					p.position.addScaledVector(p.velocity, 1 - config.scene.targetCage.viscosity);
+				} else {
+					// Inside or outside the box
+					p.position.add(p.velocity);
+				}
 
 				if (!p.isExcreted) {
 					handleBoxWallColisions(p);
+
+					if (particlesToExcreteFromBox > 0) {
+						excreteParticle(p);
+
+						particlesInBox--;
+
+						particlesToExcreteFromBox--;
+					}
 				}
 			}
 		}
 
 		// Handle target glow
-		target.material.emissiveIntensity = config.scene.target.emissiveIntensityMax / config.scene.particles.count * particlesInTarget.length;
-
-		// Handle excretion from box
-		handleExcretion(particlesInBox, config.excretion.initialDelay, config.excretion.delay, config.excretion.rate);
-
-		// Handle excretion from target
-		handleExcretion(particlesInTarget, config.targetExcretion.initialDelay, config.targetExcretion.delay, config.targetExcretion.rate);
-
+		target.material.emissiveIntensity = config.scene.target.emissiveIntensityMax / config.scene.particles.count * particlesInTarget;
 
 		// Add datapoints to chart
 		if (elapsed % config.chart.sampleInterval == 0) {
 			chart.flow({
 				columns: [
-					['body', (particlesInBox.length + particlesInTarget.length) / config.scene.particles.count * 100],
-					['target', particlesInTarget.length / config.scene.particles.count * 100],
+					['body', (particlesInBox + particlesInTarget) / config.scene.particles.count * 100],
+					['target', particlesInTarget / config.scene.particles.count * 100],
 				],
 				length: 0,
 			});
@@ -336,10 +350,10 @@ html, body {
 
 		// Reset globals. This is super-clumsy and needs refactoring!
 		particles = [];
-		visibleParticles = [];
-		particlesInBox = [];
-		particlesInTarget = [];
 		particleBatches = [];
+		visibleParticles = [];
+		particlesInBox = 0;
+		particlesInTarget = 0;
 		currentParticleBatch = 0;
 		elapsed = 0;
 
