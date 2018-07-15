@@ -248,6 +248,14 @@ html, body {
 					particlesToExcreteFromTarget--;
 				}
 			} else {
+				// Check if we leaked any particles from the target and update them accordingly
+				if (p.isInTarget) {
+					p.isInTarget = false;
+					p.material.color.set(config.scene.particles.color);
+					particlesInTarget--;
+					particlesInBox++;
+				}
+
 				if (targetCage.geometry.boundingSphere.containsPoint(p.position)) {
 					p.position.addScaledVector(p.velocity, 1 - config.scene.targetCage.viscosity);
 				} else {
