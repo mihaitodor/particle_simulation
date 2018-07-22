@@ -144,7 +144,8 @@ html, body {
 
 		let value = rand * (max - min) + min;
 
-		if (positiveOnly || rand > 0.5) {
+		// 4294967296 = 2^32
+		if (positiveOnly || ((rand * 4294967296) & 1) > 0) {
 			return value;
 		}
 
