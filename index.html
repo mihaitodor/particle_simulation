@@ -175,9 +175,11 @@ html, body {
 	}
 
 	function handleSphereWallColisions(p) {
-		let normal = new THREE.Vector3();
-		normal.subVectors(p.position, target.geometry.boundingSphere.center).normalize();
-		p.velocity = p.velocity.reflect(normal);
+		if (target.geometry.boundingSphere.distanceToPoint(p.position) > 0) {
+			let normal = new THREE.Vector3();
+			normal.subVectors(p.position, target.geometry.boundingSphere.center).normalize();
+			p.velocity = p.velocity.reflect(normal);
+		}
 	}
 
 	function excreteParticle(p) {
@@ -229,7 +231,7 @@ html, body {
 		for (let i = 0; i < visibleParticles.length; i++) {
 			let p = visibleParticles[i];
 
-			if (target.geometry.boundingSphere.containsPoint(p.position)) {
+			if (p.isInTarget || target.geometry.boundingSphere.containsPoint(p.position)) {
 				if (!p.isInTarget) {
 					p.isInTarget = true;
 					p.material.color.set(config.scene.particles.colorInTarget);
@@ -249,7 +251,8 @@ html, body {
 					particlesToExcreteFromTarget--;
 				}
 			} else {
-				// Check if we leaked any particles from the target and update them accordingly
+				// Check if we leaked any particles from the target and update them accordingly.
+				// This situation doesn't occur in the current model.
 				if (p.isInTarget) {
 					p.isInTarget = false;
 					p.material.color.set(config.scene.particles.color);
@@ -678,6 +681,8 @@ html, body {
 		);
 
 		target.geometry.computeBoundingSphere();
+		// Hack the bounding sphere radius to force the particles to remain fully contained in the target
+		target.geometry.boundingSphere.radius -= config.scene.particles.radius;
 
 		targetCage.add(target);
 
