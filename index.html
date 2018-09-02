@@ -75,6 +75,7 @@ html, body {
 				opacity: 0.3,
 				radius: 0.2,
 				viscosity: 0.4,
+				rotationSpeed: 0.005,
 			},
 			target: {
 				color: getGuiColorString('red'),
@@ -200,7 +201,7 @@ html, body {
 			return;
 		}
 
-		targetCage.rotation.y += 0.005;
+		targetCage.rotation.y += config.scene.targetCage.rotationSpeed;
 
 		// Release a new batch of particles
 		if (elapsed % config.scene.particles.batchDelay === 0 && currentParticleBatch < particleBatches.length) {
@@ -446,6 +447,7 @@ html, body {
 		targetCageFolder.add(config.scene.targetCage, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetCageFolder.add(config.scene.targetCage, 'radius', 0.1, 0.5).onFinishChange(resetAnimation);
 		targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9);
+		targetCageFolder.add(config.scene.targetCage, 'rotationSpeed', 0, 0.05);
 
 		let targetFolder = sceneFolder.addFolder('Target');
 		targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
