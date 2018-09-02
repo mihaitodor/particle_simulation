@@ -111,6 +111,7 @@ html, body {
 			showPoints: false,
 			sampleInterval: 60,
 			transitionDuration: 350,
+			exclusivePlots: false,
 		};
 
 		this.excretion = {
@@ -291,9 +292,10 @@ html, body {
 
 		// Add datapoints to chart
 		if (elapsed % config.chart.sampleInterval == 0) {
+			let bodyValue = config.chart.exclusivePlots ? particlesInBox : (particlesInBox + particlesInTarget);
 			chart.flow({
 				columns: [
-					['body', (particlesInBox + particlesInTarget) / config.scene.particles.count * 100],
+					['body', bodyValue / config.scene.particles.count * 100],
 					['target', particlesInTarget / config.scene.particles.count * 100],
 				],
 				length: 0,
@@ -491,6 +493,7 @@ html, body {
 		chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
 		chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
 		chartFolder.add(config.chart, 'transitionDuration', 0, 400).step(1).onFinishChange(resetAnimation);
+		chartFolder.add(config.chart, 'exclusivePlots').onFinishChange(resetAnimation);
 
 		gui.add({ toggle: toggleChart }, 'toggle').name('Toggle chart');
 
