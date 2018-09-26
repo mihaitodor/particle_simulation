@@ -52,6 +52,31 @@ html, body {
 }
 </style>
 
+<!--
+Chart styles inspired from here: https://github.com/c3js/c3/issues/210#issuecomment-353671994
+Please keep one rule per style element, since they will be updated dynamically in adjustColors()
+-->
+<style id="chart-axes-color">
+.chart-container .c3 .c3-axis-x path,
+.chart-container .c3 .c3-axis-x line,
+.chart-container .c3 .c3-axis-y path,
+.chart-container .c3 .c3-axis-y line {
+}
+</style>
+
+<style id="chart-text-elements-color">
+.chart-container .c3 .c3-axis-x g,
+.chart-container .c3 .c3-axis-y g,
+.chart-container .c3 .c3-axis-y-label,
+.chart-container .c3 .c3-axis-x-label {
+}
+</style>
+
+<style id="chart-legend-text-color">
+.chart-container .c3 .c3-legend-item text {
+}
+</style>
+
 <script>
 	"use strict";
 
@@ -108,6 +133,9 @@ html, body {
 		};
 
 		this.chart = {
+			axesColor: getGuiColorString('black'),
+			textElementsColor: getGuiColorString('black'),
+			legendTextColor: getGuiColorString('black'),
 			showPoints: false,
 			sampleInterval: 60,
 			transitionDuration: 350,
@@ -339,6 +367,10 @@ html, body {
 				p.material.color.set(config.scene.particles.color);
 			}
 		}
+
+		document.getElementById("chart-axes-color").sheet.cssRules[0].style.stroke = config.chart.axesColor;
+		document.getElementById("chart-text-elements-color").sheet.cssRules[0].style.fill = config.chart.textElementsColor;
+		document.getElementById("chart-legend-text-color").sheet.cssRules[0].style.fill = config.chart.legendTextColor;
 	}
 
 	function adjustParticlesScale() {
@@ -380,6 +412,8 @@ html, body {
 
 		chart = chart.destroy();
 		initChart();
+
+		adjustColors();
 
 		// Restart the animation
 		renderLoop();
@@ -490,6 +524,9 @@ html, body {
 		targetExcretionFolder.add(config.targetExcretion, 'delay', 5, 120).step(1);
 
 		let chartFolder = sceneFolder.addFolder('Chart');
+		chartFolder.addColor(config.chart, 'axesColor').onChange(adjustColors);
+		chartFolder.addColor(config.chart, 'textElementsColor').onChange(adjustColors);
+		chartFolder.addColor(config.chart, 'legendTextColor').onChange(adjustColors);
 		chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
 		chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
 		chartFolder.add(config.chart, 'transitionDuration', 0, 400).step(1).onFinishChange(resetAnimation);
@@ -647,6 +684,8 @@ html, body {
 		initGUI();
 
 		initChart();
+
+		adjustColors();
 
 		renderLoop();
 	}
