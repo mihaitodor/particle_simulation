@@ -157,6 +157,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 			delay: 50,
 		};
 
+		this.cageEnabled = true;
+
 		this.pauseAnimation = false;
 	};
 
@@ -236,7 +238,9 @@ Please keep one rule per style element, since they will be updated dynamically i
 			return;
 		}
 
-		targetCage.rotation.y += config.scene.targetCage.rotationSpeed;
+		if (config.cageEnabled) {
+			targetCage.rotation.y += config.scene.targetCage.rotationSpeed;
+		}
 
 		// Release a new batch of particles
 		if (elapsed % config.scene.particles.batchDelay === 0 && currentParticleBatch < particleBatches.length) {
@@ -300,7 +304,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 					particlesInBox++;
 				}
 
-				if (targetCage.geometry.boundingSphere.containsPoint(p.position)) {
+				if (config.cageEnabled && targetCage.geometry.boundingSphere.containsPoint(p.position)) {
 					p.position.addScaledVector(p.velocity, 1 - config.scene.targetCage.viscosity);
 				} else {
 					// Inside or outside the box
@@ -481,6 +485,10 @@ Please keep one rule per style element, since they will be updated dynamically i
 		descender(config);
 	}
 
+	function toggleCage() {
+		targetCage.visible = !targetCage.visible;
+	}
+
 	function toggleChart() {
 		// For some reason `chart.toggle('', {withLegend: true})` doesn't work :(
 		let c = document.getElementById('chart');
@@ -580,6 +588,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 		chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
 		chartFolder.add(config.chart, 'transitionDuration', 0, 400).step(1).onFinishChange(resetAnimation);
 		chartFolder.add(config.chart, 'exclusivePlots').onFinishChange(resetAnimation);
+
+		gui.add(config, 'cageEnabled').name('Enable Cage').onFinishChange(toggleCage);
 
 		gui.add({ toggle: toggleChart }, 'toggle').name('Toggle chart');
 
