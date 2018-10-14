@@ -103,6 +103,9 @@ Please keep one rule per style element, since they will be updated dynamically i
 				rotationSpeed: 0.005,
 			},
 			target: {
+				x: 0,
+				y: 0,
+				z: 0,
 				color: getGuiColorString('red'),
 				opacity: 0.3,
 				radius: 0.1,
@@ -162,6 +165,9 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 	// Scene objects
 	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], particlesInBox = 0, particlesInTarget = 0, currentParticleBatch = 0;
+
+	// GUI controls that need to be refreshed when adjusting sizes
+	let guiTargetX, guiTargetY, guiTargetZ;
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
@@ -389,6 +395,40 @@ Please keep one rule per style element, since they will be updated dynamically i
 		target.material.shininess = config.scene.target.shininess;
 	}
 
+	function adjustTargetPosition() {
+		// Moving the target implies moving the cage as well
+		targetCage.position.setX(config.scene.target.x);
+		targetCage.position.setY(config.scene.target.y);
+		targetCage.position.setZ(config.scene.target.z);
+		targetCage.geometry.boundingSphere.center = targetCage.position;
+
+		target.position.setX(config.scene.target.x);
+		target.position.setY(config.scene.target.y);
+		target.position.setZ(config.scene.target.z);
+		target.geometry.boundingSphere.center = target.position;
+	}
+
+	function getTargetPositionRange(range) {
+		let output = range / 2 - config.scene.targetCage.radius;
+
+		if (range < 0) {
+			return config.scene.targetCage.radius;
+		}
+
+		return output
+	}
+
+	function adjustTargetGUIRanges() {
+		let targetXRange = getTargetPositionRange(config.scene.box.width);
+		guiTargetX.min(-targetXRange).max(targetXRange).updateDisplay();
+
+		let targetYRange = getTargetPositionRange(config.scene.box.height);
+		guiTargetY.min(-targetYRange).max(targetYRange).updateDisplay();
+
+		let targetZRange = getTargetPositionRange(config.scene.box.depth);
+		guiTargetZ.min(-targetZRange).max(targetZRange).updateDisplay();
+	}
+
 	function toggleChartPoints() {
 		chart.internal.config.point_show = config.chart.showPoints;
 	}
@@ -414,6 +454,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 		initChart();
 
 		adjustColors();
+
+		adjustTargetGUIRanges();
 
 		// Restart the animation
 		renderLoop();
@@ -487,6 +529,13 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		let targetFolder = sceneFolder.addFolder('Target');
 		targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
+		// dat.gui sets the implicit step value to 1 for x, y and z due to their initial value
+		let targetXRange = getTargetPositionRange(config.scene.box.width);
+		guiTargetX = targetFolder.add(config.scene.target, 'x', -targetXRange, targetXRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
+		let targetYRange = getTargetPositionRange(config.scene.box.height);
+		guiTargetY = targetFolder.add(config.scene.target, 'y', -targetYRange, targetYRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
+		let targetZRange = getTargetPositionRange(config.scene.box.depth);
+		guiTargetZ = targetFolder.add(config.scene.target, 'z', -targetZRange, targetZRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
 		targetFolder.add(config.scene.target, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetFolder.add(config.scene.target, 'radius', 0.05, 0.5).onFinishChange(resetAnimation);
 		targetFolder.add(config.scene.target, 'viscosity', 0, 0.9);
@@ -737,7 +786,10 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// Hack the bounding sphere radius to force the particles to remain fully contained in the target
 		target.geometry.boundingSphere.radius -= config.scene.particles.radius;
 
-		targetCage.add(target);
+		box.add(target);
+
+		// Set the initial position of the target
+		adjustTargetPosition();
 
 		inputTube = new THREE.Mesh(
 			new THREE.CylinderBufferGeometry(config.scene.tubes.radius, config.scene.tubes.radius, config.scene.tubes.height, 8, 1, false, 0.0, Math.PI * 2),
