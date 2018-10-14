@@ -613,6 +613,9 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		p.isInTarget = false; // Inside the target sphere
 
+		// Disable culling (we don't need to hide particles that go out of view)
+		p.frustumCulled = false;
+
 		return p;
 	}
 
@@ -775,6 +778,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 				opacity: config.scene.targetCage.opacity,
 			}),
 		);
+		// Helps avoid some unexpected culling when placed towards the top of the scene
+		targetCage.frustumCulled = false;
 
 		targetCage.geometry.computeBoundingSphere();
 
@@ -791,6 +796,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 				opacity: config.scene.target.opacity,
 			})
 		);
+		// Helps avoid some unexpected culling when placed towards the top of the scene
+		target.frustumCulled = false;
 
 		target.geometry.computeBoundingSphere();
 		// Hack the bounding sphere radius to force the particles to remain fully contained in the target
