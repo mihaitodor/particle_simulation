@@ -783,6 +783,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		targetCage.geometry.computeBoundingSphere();
 
+		targetCage.visible = config.cageEnabled;
+
 		box.add(targetCage);
 
 		target = new THREE.Mesh(
