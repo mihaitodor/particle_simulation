@@ -126,7 +126,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 				changeColor: true,
 				colorInTarget: getGuiColorString('red'),
 				radius: 0.0035,
-				scale: 1,
 				count: 1000,
 				batchSize: 10,
 				batchDelay: 15,
@@ -383,12 +382,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 		document.getElementById("chart-legend-text-color").sheet.cssRules[0].style.fill = config.chart.legendTextColor;
 	}
 
-	function adjustParticlesScale() {
-		for (let i = 0; i < particles.length; i++) {
-			particles[i].scale.set(config.scene.particles.scale, config.scene.particles.scale, config.scene.particles.scale);
-		}
-	}
-
 	function adjustOpacities() {
 		box.material.opacity = config.scene.box.opacity;
 		targetCage.material.opacity = config.scene.targetCage.opacity;
@@ -563,7 +556,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 		particlesFolder.add(config.scene.particles, 'changeColor').onFinishChange(adjustColors);
 		particlesFolder.addColor(config.scene.particles, 'colorInTarget').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'radius', 0.001, 0.02).onFinishChange(resetAnimation);
-		particlesFolder.add(config.scene.particles, 'scale', 0.3, 3).onChange(adjustParticlesScale);
 		particlesFolder.add(config.scene.particles, 'count', 1, 10000).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'batchSize', 1, 100).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'batchDelay', 5, 120).step(1).onFinishChange(resetAnimation);
