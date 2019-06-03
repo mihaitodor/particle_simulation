@@ -562,7 +562,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'changeColor').onFinishChange(adjustColors);
 		particlesFolder.addColor(config.scene.particles, 'colorInTarget').onChange(adjustColors);
-		particlesFolder.add(config.scene.particles, 'radius', 0.001, 0.01).onFinishChange(resetAnimation);
+		particlesFolder.add(config.scene.particles, 'radius', 0.001, 0.02).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'scale', 0.3, 3).onChange(adjustParticlesScale);
 		particlesFolder.add(config.scene.particles, 'count', 1, 10000).step(1).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'batchSize', 1, 100).step(1).onFinishChange(resetAnimation);
