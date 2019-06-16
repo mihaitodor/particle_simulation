@@ -101,6 +101,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 				radius: 0.2,
 				viscosity: 0.4,
 				rotationSpeed: 0.005,
+				particleCaptureProbability: 0.5,
+				gravity: 0.05,
 			},
 			target: {
 				x: 0,
@@ -213,10 +215,15 @@ Please keep one rule per style element, since they will be updated dynamically i
 			p.velocity.setZ(-p.velocity.z);
 	}
 
-	function handleSphereWallColisions(p) {
-		if (target.geometry.boundingSphere.distanceToPoint(p.position) > 0) {
+	// Pass collisionProbability=1 to not skip any collision
+	function handleSphereWallColisions(sphere, p, collisionProbability) {
+		if (collisionProbability < 1 && Math.random() < (1 - collisionProbability)) {
+			return;
+		}
+
+		if (sphere.geometry.boundingSphere.distanceToPoint(p.position) > 0) {
 			let normal = new THREE.Vector3();
-			normal.subVectors(p.position, target.geometry.boundingSphere.center).normalize();
+			normal.subVectors(p.position, sphere.geometry.boundingSphere.center).normalize();
 			p.velocity = p.velocity.reflect(normal);
 		}
 	}
@@ -269,6 +276,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		}
 
 		// Animate particles
+
 		for (let i = 0; i < visibleParticles.length; i++) {
 			let p = visibleParticles[i];
 
@@ -284,7 +292,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 				p.position.addScaledVector(p.velocity, 1 - config.scene.target.viscosity);
 
-				handleSphereWallColisions(p);
+				handleSphereWallColisions(target, p, 1);
 
 				if (particlesToExcreteFromTarget > 0) {
 					excreteParticle(p);
@@ -303,8 +311,22 @@ Please keep one rule per style element, since they will be updated dynamically i
 					particlesInBox++;
 				}
 
-				if (config.cageEnabled && targetCage.geometry.boundingSphere.containsPoint(p.position)) {
-					p.position.addScaledVector(p.velocity, 1 - config.scene.targetCage.viscosity);
+				if (config.cageEnabled && (targetCage.geometry.boundingSphere.containsPoint(p.position))) {
+					// Get the vector from the target center to the particle
+					let positionDirection = target.position.clone().sub(p.position);
+
+					let depthInCage = config.scene.targetCage.radius - p.position.length();
+
+					// Simulate gravity
+					let l = p.velocity.length();
+					positionDirection.multiplyScalar(depthInCage * config.scene.targetCage.gravity);
+					p.velocity.add(positionDirection);
+					p.velocity.normalize().multiplyScalar(l);
+
+					// Simulate viscosity
+					p.position.addScaledVector(p.velocity, (1 - config.scene.targetCage.viscosity));
+
+					handleSphereWallColisions(targetCage, p, config.scene.targetCage.particleCaptureProbability);
 				} else {
 					// Inside or outside the box
 					p.position.add(p.velocity);
@@ -527,6 +549,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 		targetCageFolder.add(config.scene.targetCage, 'radius', 0.05, 0.5).onFinishChange(resetAnimation);
 		targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9);
 		targetCageFolder.add(config.scene.targetCage, 'rotationSpeed', 0, 0.05);
+		targetCageFolder.add(config.scene.targetCage, 'particleCaptureProbability', 0, 1).onFinishChange(resetAnimation);
+		targetCageFolder.add(config.scene.targetCage, 'gravity', 0.0001, 0.1).onFinishChange(resetAnimation);
 
 		let targetFolder = sceneFolder.addFolder('Target');
 		targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
