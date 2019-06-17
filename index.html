@@ -329,7 +329,13 @@ Please keep one rule per style element, since they will be updated dynamically i
 					handleSphereWallColisions(targetCage, p, config.scene.targetCage.particleCaptureProbability);
 				} else {
 					// Inside or outside the box
-					p.position.add(p.velocity);
+
+					// Remove if too far away
+					if (p.position.length() > config.scene.box.width * 2) {
+						p.visible = false;
+					} else {
+						p.position.add(p.velocity);
+					}
 				}
 
 				if (!p.isExcreted) {
