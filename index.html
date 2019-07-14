@@ -707,7 +707,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 						fit: false,
 					},
 					label: {
-						text: 'Samples',
+						text: 'Time (samples)',
 						position: "outer-right",
 					},
 				},
@@ -716,7 +716,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 					max: 100,
 					padding: {bottom: 0, top: 0},
 					label: {
-						text: 'Particles %',
+						text: 'Relative % of fluorescent agents',
 						position: 'outer-top',
 					},
 				},
@@ -738,8 +738,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 					['target', 0],
 				],
 				names: {
-					body:   '% in box',
-					target: '% in target',
+					body:   '% in FOV',
+					target: '% in ROI',
 				}
 			},
 			legend: {
@@ -748,6 +748,9 @@ Please keep one rule per style element, since they will be updated dynamically i
 			transition: {
 				duration: config.chart.transitionDuration,
 			},
+			title: {
+				text: '% FOV / ROI distributions over time',
+			}
 		});
 	}
 
