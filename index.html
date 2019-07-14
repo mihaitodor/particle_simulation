@@ -557,28 +557,28 @@ Please keep one rule per style element, since they will be updated dynamically i
 		let sceneFolder = gui.addFolder('Scene');
 		sceneFolder.open();
 
-		let backgroundFolder = sceneFolder.addFolder('Background');
-		backgroundFolder.addColor(config.scene.background, 'color').onChange(adjustColors);
+		// let backgroundFolder = sceneFolder.addFolder('Background');
+		// backgroundFolder.addColor(config.scene.background, 'color').onChange(adjustColors);
 
 		let boxFolder = sceneFolder.addFolder('Box');
-		boxFolder.addColor(config.scene.box, 'color').onChange(adjustColors);
-		boxFolder.addColor(config.scene.box, 'edgesColor').onChange(adjustColors);
-		boxFolder.add(config.scene.box, 'opacity', 0.01, 1).onChange(adjustOpacities);
+		// boxFolder.addColor(config.scene.box, 'color').onChange(adjustColors);
+		// boxFolder.addColor(config.scene.box, 'edgesColor').onChange(adjustColors);
+		// boxFolder.add(config.scene.box, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		boxFolder.add(config.scene.box, 'width', 0.3, 2).onFinishChange(resetAnimation);
 		boxFolder.add(config.scene.box, 'height', 0.3, 2).onFinishChange(resetAnimation);
 		boxFolder.add(config.scene.box, 'depth', 0.3, 2).onFinishChange(resetAnimation);
 
 		let targetCageFolder = sceneFolder.addFolder('Target Cage');
-		targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
-		targetCageFolder.add(config.scene.targetCage, 'opacity', 0.01, 1).onChange(adjustOpacities);
+		// targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
+		// targetCageFolder.add(config.scene.targetCage, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetCageFolder.add(config.scene.targetCage, 'radius', 0.05, 0.5).onFinishChange(resetAnimation);
-		targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9);
-		targetCageFolder.add(config.scene.targetCage, 'rotationSpeed', 0, 0.05);
-		targetCageFolder.add(config.scene.targetCage, 'particleCaptureProbability', 0, 1).onFinishChange(resetAnimation);
-		targetCageFolder.add(config.scene.targetCage, 'gravity', 0.0001, 0.1).onFinishChange(resetAnimation);
+		// targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9);
+		// targetCageFolder.add(config.scene.targetCage, 'rotationSpeed', 0, 0.05);
+		// targetCageFolder.add(config.scene.targetCage, 'particleCaptureProbability', 0, 1).onFinishChange(resetAnimation);
+		// targetCageFolder.add(config.scene.targetCage, 'gravity', 0.0001, 0.1).onFinishChange(resetAnimation);
 
 		let targetFolder = sceneFolder.addFolder('Target');
-		targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
+		// targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
 		// dat.gui sets the implicit step value to 1 for x, y and z due to their initial value
 		let targetXRange = getTargetPositionRange(config.scene.box.width);
 		guiTargetX = targetFolder.add(config.scene.target, 'x', -targetXRange, targetXRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
@@ -586,55 +586,55 @@ Please keep one rule per style element, since they will be updated dynamically i
 		guiTargetY = targetFolder.add(config.scene.target, 'y', -targetYRange, targetYRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
 		let targetZRange = getTargetPositionRange(config.scene.box.depth);
 		guiTargetZ = targetFolder.add(config.scene.target, 'z', -targetZRange, targetZRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
-		targetFolder.add(config.scene.target, 'opacity', 0.01, 1).onChange(adjustOpacities);
+		// targetFolder.add(config.scene.target, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetFolder.add(config.scene.target, 'radius', 0.02, 0.5).onFinishChange(resetAnimation);
-		targetFolder.add(config.scene.target, 'viscosity', 0, 0.9);
-		targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
-		targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
-		targetFolder.add(config.scene.target, 'emissiveIntensityMax', 0.2, 2).name('glowMaxValue').onFinishChange(resetAnimation);
+		// targetFolder.add(config.scene.target, 'viscosity', 0, 0.9);
+		// targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
+		// targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
+		// targetFolder.add(config.scene.target, 'emissiveIntensityMax', 0.2, 2).name('glowMaxValue').onFinishChange(resetAnimation);
 
-		let tubesFolder = sceneFolder.addFolder('Tubes');
-		tubesFolder.addColor(config.scene.tubes, 'color').onChange(adjustColors);
-		tubesFolder.addColor(config.scene.tubes, 'edgesColor').onChange(adjustColors);
-		tubesFolder.add(config.scene.tubes, 'height', 0.1, 0.5).onFinishChange(resetAnimation);
-		tubesFolder.add(config.scene.tubes, 'radius', 0.01, 0.05).onFinishChange(resetAnimation);
-		tubesFolder.add(config.scene.tubes, 'verticalDisplacement', 0.1, 0.9).onFinishChange(resetAnimation);
+		// let tubesFolder = sceneFolder.addFolder('Tubes');
+		// tubesFolder.addColor(config.scene.tubes, 'color').onChange(adjustColors);
+		// tubesFolder.addColor(config.scene.tubes, 'edgesColor').onChange(adjustColors);
+		// tubesFolder.add(config.scene.tubes, 'height', 0.1, 0.5).onFinishChange(resetAnimation);
+		// tubesFolder.add(config.scene.tubes, 'radius', 0.01, 0.05).onFinishChange(resetAnimation);
+		// tubesFolder.add(config.scene.tubes, 'verticalDisplacement', 0.1, 0.9).onFinishChange(resetAnimation);
 
 		let particlesFolder = sceneFolder.addFolder('Particles');
-		particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustColors);
+		// particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'changeColor').onFinishChange(adjustColors);
-		particlesFolder.addColor(config.scene.particles, 'colorInTarget').onChange(adjustColors);
+		// particlesFolder.addColor(config.scene.particles, 'colorInTarget').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'radius', 0.001, 0.02).onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'count', 1, 10000).step(1).onFinishChange(resetAnimation);
-		particlesFolder.add(config.scene.particles, 'batchSize', 1, 100).step(1).onFinishChange(resetAnimation);
-		particlesFolder.add(config.scene.particles, 'batchDelay', 5, 120).step(1).onFinishChange(resetAnimation);
-		particlesFolder.add(config.scene.particles, 'velocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
-		particlesFolder.add(config.scene.particles, 'velocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
+		// particlesFolder.add(config.scene.particles, 'batchSize', 1, 100).step(1).onFinishChange(resetAnimation);
+		// particlesFolder.add(config.scene.particles, 'batchDelay', 5, 120).step(1).onFinishChange(resetAnimation);
+		// particlesFolder.add(config.scene.particles, 'velocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
+		// particlesFolder.add(config.scene.particles, 'velocityMax', SCENE_SCALE / 500, SCENE_SCALE / 50).onFinishChange(resetAnimation);
 
 		let excretionFolder = sceneFolder.addFolder('Excretion');
 		excretionFolder.add(config.excretion, 'initialDelay', 120, 600).step(1).onFinishChange(resetAnimation);
 		excretionFolder.add(config.excretion, 'rate', 1, 100).step(1);
-		excretionFolder.add(config.excretion, 'delay', 5, 120).step(1);
+		// excretionFolder.add(config.excretion, 'delay', 5, 120).step(1);
 
 		let targetExcretionFolder = sceneFolder.addFolder('Target Excretion');
 		targetExcretionFolder.add(config.targetExcretion, 'initialDelay', 120, 1200).step(1).onFinishChange(resetAnimation);
 		targetExcretionFolder.add(config.targetExcretion, 'rate', 1, 50).step(1);
-		targetExcretionFolder.add(config.targetExcretion, 'delay', 5, 120).step(1);
+		// targetExcretionFolder.add(config.targetExcretion, 'delay', 5, 120).step(1);
 
-		let chartFolder = sceneFolder.addFolder('Chart');
-		chartFolder.addColor(config.chart, 'axesColor').onChange(adjustColors);
-		chartFolder.addColor(config.chart, 'textElementsColor').onChange(adjustColors);
-		chartFolder.addColor(config.chart, 'legendTextColor').onChange(adjustColors);
-		chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
-		chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
-		chartFolder.add(config.chart, 'transitionDuration', 0, 400).step(1).onFinishChange(resetAnimation);
-		chartFolder.add(config.chart, 'exclusivePlots').onFinishChange(resetAnimation);
+		// let chartFolder = sceneFolder.addFolder('Chart');
+		// chartFolder.addColor(config.chart, 'axesColor').onChange(adjustColors);
+		// chartFolder.addColor(config.chart, 'textElementsColor').onChange(adjustColors);
+		// chartFolder.addColor(config.chart, 'legendTextColor').onChange(adjustColors);
+		// chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
+		// chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
+		// chartFolder.add(config.chart, 'transitionDuration', 0, 400).step(1).onFinishChange(resetAnimation);
+		// chartFolder.add(config.chart, 'exclusivePlots').onFinishChange(resetAnimation);
 
 		gui.add(config, 'cageEnabled').name('Enable Cage').onFinishChange(toggleCage);
 
 		gui.add({ toggle: toggleChart }, 'toggle').name('Toggle chart');
 
-		gui.add({ toggle: toggleStats }, 'toggle').name('Toggle stats');
+		// gui.add({ toggle: toggleStats }, 'toggle').name('Toggle stats');
 
 		gui.add(config, 'pauseAnimation').name('Pause animation');
 
