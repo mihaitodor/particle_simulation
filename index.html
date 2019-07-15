@@ -84,6 +84,18 @@ Please keep one rule per style element, since they will be updated dynamically i
 }
 </style>
 
+<style id="c3-data-target-line-stroke">
+.chart-container .c3 .c3-target-target {
+	stroke-dasharray: 5;
+}
+</style>
+
+<style id="c3-legend-target-tile-stroke">
+.chart-container .c3 .c3-legend-item-target .c3-legend-item-tile {
+	stroke-dasharray: 5;
+}
+</style>
+
 <script>
 	"use strict";
 
@@ -744,20 +756,30 @@ Please keep one rule per style element, since they will be updated dynamically i
 					['body',   0],
 					['target', 0],
 				],
+				colors: {
+					'body':   '#000000',
+					'target': '#000000',
+				},
 				names: {
 					body:   '% in FOV',
 					target: '% in ROI',
-				}
+				},
 			},
 			legend: {
 				position: 'bottom',
+				item: {
+					tile: {
+						width: 50,
+						height: 1,
+					},
+				},
 			},
 			transition: {
 				duration: config.chart.transitionDuration,
 			},
 			title: {
 				text: '% FOV / ROI distributions over time',
-			}
+			},
 		});
 	}
 
