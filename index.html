@@ -422,7 +422,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 		}
 
 		// Animate particles
-
 		for (let i = 0; i < visibleParticles.length; i++) {
 			let p = visibleParticles[i];
 
@@ -502,7 +501,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		target.material.emissiveIntensity = config.scene.target.emissiveIntensityMax / config.scene.particles.count * particlesInTarget;
 
 		// Add datapoints to chart
-		if (elapsed % config.chart.sampleInterval == 0) {
+		if ((particlesInBox > 0 || particlesInTarget > 0) && elapsed % config.chart.sampleInterval == 0) {
 			let bodyValue = config.chart.exclusivePlots ? particlesInBox : (particlesInBox + particlesInTarget);
 			chart.flow({
 				columns: [
