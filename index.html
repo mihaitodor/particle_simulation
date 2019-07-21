@@ -106,6 +106,126 @@ Please keep one rule per style element, since they will be updated dynamically i
 <script>
 	"use strict";
 
+	let presets =
+{
+	"preset": "Default",
+	"remembered": {
+	  "Default": {
+		"0": {
+		  "pauseAnimation": false
+		},
+		"1": {},
+		"2": {},
+		"3": {
+		  "width": 0.6,
+		  "height": 1.8,
+		  "depth": 0.6
+		},
+		"4": {
+		  "radius": 0.08,
+		  "cageEnabled": true
+		},
+		"5": {
+		  "x": 0.0224,
+		  "y": -0.0292,
+		  "z": -0.219,
+		  "radius": 0.05
+		},
+		"6": {},
+		"7": {
+		  "changeColor": true,
+		  "radius": 0.01,
+		  "count": 3000
+		},
+		"8": {},
+		"9": {
+		  "initialDelay": 250,
+		  "rate": 20
+		},
+		"10": {
+		  "initialDelay": 480,
+		  "rate": 4
+		}
+	  },
+	  "Simulation 1": {
+		"0": {
+		  "pauseAnimation": false
+		},
+		"1": {},
+		"2": {},
+		"3": {
+		  "width": 0.6,
+		  "height": 1.63,
+		  "depth": 0.4
+		},
+		"4": {
+		  "radius": 0.08,
+		  "cageEnabled": false
+		},
+		"5": {
+		  "x": 0,
+		  "y": 0,
+		  "z": 0,
+		  "radius": 0.05
+		},
+		"6": {},
+		"7": {
+		  "changeColor": true,
+		  "radius": 0.01,
+		  "count": 3000
+		},
+		"8": {},
+		"9": {
+		  "initialDelay": 250,
+		  "rate": 20
+		},
+		"10": {
+		  "initialDelay": 480,
+		  "rate": 4
+		}
+	  }
+	},
+	"closed": false,
+	"folders": {
+	  "Simulation settings": {
+		"preset": "Default",
+		"closed": false,
+		"folders": {
+		  "FOV": {
+			"preset": "Default",
+			"closed": true,
+			"folders": {}
+		  },
+		  "ROI": {
+			"preset": "Default",
+			"closed": true,
+			"folders": {}
+		  },
+		  "EPR zone": {
+			"preset": "Default",
+			"closed": true,
+			"folders": {}
+		  },
+		  "Fluorescent agent": {
+			"preset": "Default",
+			"closed": true,
+			"folders": {}
+		  },
+		  "FOV clearance": {
+			"preset": "Default",
+			"closed": true,
+			"folders": {}
+		  },
+		  "ROI clearance": {
+			"preset": "Default",
+			"closed": true,
+			"folders": {}
+		  }
+		}
+	  }
+	}
+  };
+
 	const SCENE_SCALE = 1;
 
 	let Config = function() {
@@ -576,7 +696,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 			}
 		}
 
-		gui = new dat.GUI();
+		gui = new dat.GUI({ load: presets });
 
 		rememberGUISettings();
 
