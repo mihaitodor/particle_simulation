@@ -71,6 +71,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 </style>
 
 <style id="chart-text-elements-color">
+.chart-container .c3 .c3-title,
 .chart-container .c3 .c3-axis-x g,
 .chart-container .c3 .c3-axis-y g,
 .chart-container .c3 .c3-axis-y-label,
@@ -110,7 +111,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 	let Config = function() {
 		this.scene = {
 			background: {
-				color: getGuiColorString('white'),
+				color: getGuiColorString('black'),
 			},
 			box: {
 				color: getGuiColorString('red'),
@@ -163,9 +164,10 @@ Please keep one rule per style element, since they will be updated dynamically i
 		};
 
 		this.chart = {
-			axesColor: getGuiColorString('black'),
-			textElementsColor: getGuiColorString('black'),
-			legendTextColor: getGuiColorString('black'),
+			linesColor: getGuiColorString('white'),
+			axesColor: getGuiColorString('white'),
+			textElementsColor: getGuiColorString('white'),
+			legendTextColor: getGuiColorString('white'),
 			showPoints: false,
 			sampleInterval: 60,
 			transitionDuration: 350,
@@ -761,8 +763,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 					['target', 0],
 				],
 				colors: {
-					'body':   '#000000',
-					'target': '#000000',
+					'body':   config.chart.linesColor,
+					'target': config.chart.linesColor,
 				},
 				names: {
 					body:   '% in FOV',
