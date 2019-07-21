@@ -122,6 +122,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 				rotationSpeed: 0.005,
 				particleCaptureProbability: 0.5,
 				gravity: 0.05,
+				cageEnabled: true,
 			},
 			target: {
 				x: 0,
@@ -176,8 +177,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 			rate: 3,
 			delay: 50,
 		};
-
-		this.cageEnabled = true;
 
 		this.pauseAnimation = false;
 	};
@@ -263,7 +262,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 			return;
 		}
 
-		if (config.cageEnabled) {
+		if (config.scene.targetCage.cageEnabled) {
 			targetCage.rotation.y += config.scene.targetCage.rotationSpeed;
 		}
 
@@ -330,7 +329,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 					particlesInBox++;
 				}
 
-				if (config.cageEnabled && (targetCage.geometry.boundingSphere.containsPoint(p.position))) {
+				if (config.scene.targetCage.cageEnabled && (targetCage.geometry.boundingSphere.containsPoint(p.position))) {
 					// Get the vector from the target center to the particle
 					let positionDirection = target.position.clone().sub(p.position);
 
@@ -587,15 +586,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 		boxFolder.add(config.scene.box, 'height', 0.3, 2).name('Height').onFinishChange(resetAnimation);
 		boxFolder.add(config.scene.box, 'depth', 0.3, 2).name('Depth').onFinishChange(resetAnimation);
 
-		let targetCageFolder = sceneFolder.addFolder('EPR zone');
-		// targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
-		// targetCageFolder.add(config.scene.targetCage, 'opacity', 0.01, 1).onChange(adjustOpacities);
-		targetCageFolder.add(config.scene.targetCage, 'radius', 0.05, 0.5).name('Radius').onFinishChange(resetAnimation);
-		// targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9);
-		// targetCageFolder.add(config.scene.targetCage, 'rotationSpeed', 0, 0.05);
-		// targetCageFolder.add(config.scene.targetCage, 'particleCaptureProbability', 0, 1).onFinishChange(resetAnimation);
-		// targetCageFolder.add(config.scene.targetCage, 'gravity', 0.0001, 0.1).onFinishChange(resetAnimation);
-
 		let targetFolder = sceneFolder.addFolder('ROI');
 		// targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
 		// dat.gui sets the implicit step value to 1 for x, y and z due to their initial value
@@ -611,6 +601,16 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
 		// targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
 		// targetFolder.add(config.scene.target, 'emissiveIntensityMax', 0.2, 2).name('glowMaxValue').onFinishChange(resetAnimation);
+
+		let targetCageFolder = sceneFolder.addFolder('EPR zone');
+		// targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
+		// targetCageFolder.add(config.scene.targetCage, 'opacity', 0.01, 1).onChange(adjustOpacities);
+		targetCageFolder.add(config.scene.targetCage, 'radius', 0.05, 0.5).name('Radius').onFinishChange(resetAnimation);
+		// targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9);
+		// targetCageFolder.add(config.scene.targetCage, 'rotationSpeed', 0, 0.05);
+		// targetCageFolder.add(config.scene.targetCage, 'particleCaptureProbability', 0, 1).onFinishChange(resetAnimation);
+		// targetCageFolder.add(config.scene.targetCage, 'gravity', 0.0001, 0.1).onFinishChange(resetAnimation);
+		targetCageFolder.add(config.scene.targetCage, 'cageEnabled').name('EPR zone enabled').onFinishChange(toggleCage);
 
 		// let tubesFolder = sceneFolder.addFolder('Tubes');
 		// tubesFolder.addColor(config.scene.tubes, 'color').onChange(adjustColors);
@@ -648,8 +648,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
 		// chartFolder.add(config.chart, 'transitionDuration', 0, 400).step(1).onFinishChange(resetAnimation);
 		// chartFolder.add(config.chart, 'exclusivePlots').onFinishChange(resetAnimation);
-
-		gui.add(config, 'cageEnabled').name('EPR zone enabled').onFinishChange(toggleCage);
 
 		gui.add({ toggle: toggleChart }, 'toggle').name('Toggle chart');
 
@@ -856,7 +854,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		targetCage.geometry.computeBoundingSphere();
 
-		targetCage.visible = config.cageEnabled;
+		targetCage.visible = config.scene.targetCage.cageEnabled;
 
 		box.add(targetCage);
 
