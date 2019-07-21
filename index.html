@@ -675,6 +675,34 @@ Please keep one rule per style element, since they will be updated dynamically i
 		}
 	}
 
+	function saveData() {
+		// Set the header of the CSV file
+		var payload = 'Body,Target';
+
+		let bodyValues = chart.data('body')[0].values;
+		let targetValues = chart.data('target')[0].values;
+
+		// Write the values wrapped in quotes, just in case some computer locale
+		// uses commas as the decimal separator.
+		for (var i = 0; i < bodyValues.length; i++) {
+			payload += '\n"' + bodyValues[i].value.toString() + '","' + targetValues[i].value.toString() + '"';
+		}
+
+		// Create a dummy anchor element
+		var downloadAnchor = window.document.createElement('a');
+		downloadAnchor.href = window.URL.createObjectURL(new Blob([payload], { type: 'text/csv' }));
+		downloadAnchor.download = 'data.csv';
+
+		// Append anchor to body
+		document.body.appendChild(downloadAnchor);
+
+		// Trigger download
+		downloadAnchor.click();
+
+		// Remove anchor from body
+		document.body.removeChild(downloadAnchor);
+	}
+
 	function initGUI() {
 		// Inspired from https://stackoverflow.com/questions/27362914/how-to-add-tooltips-to-dat-gui
 		// dat.GUI copies the prototype of superclass Controller to all other controllers so it
@@ -783,6 +811,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 		gui.add(config, 'pauseAnimation').name('Pause animation');
 
 		gui.add({ reset: resetAnimation }, 'reset').name('Reset animation');
+
+		gui.add({ save: saveData }, 'save').name('Save data');
 	}
 
 	function initParticle(p) {
