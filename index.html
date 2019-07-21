@@ -621,7 +621,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		let particlesFolder = sceneFolder.addFolder('Fluorescent agent');
 		// particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustColors);
-		particlesFolder.add(config.scene.particles, 'changeColor').name('Change colour').onFinishChange(adjustColors);
+		particlesFolder.add(config.scene.particles, 'changeColor').name('Flu enabled').title('Flu off/on response enabled').onFinishChange(adjustColors);
 		// particlesFolder.addColor(config.scene.particles, 'colorInTarget').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'radius', 0.001, 0.02).name('Radius').onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'count', 1, 10000).name('Count').step(1).onFinishChange(resetAnimation);
