@@ -549,8 +549,11 @@ Please keep one rule per style element, since they will be updated dynamically i
 			let p = particles[i];
 			if (p.isInTarget && config.scene.particles.changeColor) {
 				p.material.color.set(config.scene.particles.colorInTarget);
-			} else {
+			} else if (config.scene.particles.changeColor) {
 				p.material.color.set(config.scene.particles.color);
+			} else {
+				// Use colorInTarget if changeColor is unchecked
+				p.material.color.set(config.scene.particles.colorInTarget);
 			}
 		}
 
