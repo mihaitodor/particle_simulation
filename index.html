@@ -79,8 +79,13 @@ Please keep one rule per style element, since they will be updated dynamically i
 }
 </style>
 
-<style id="chart-legend-text-color">
-.chart-container .c3 .c3-legend-item text {
+<style id="chart-legend-body-text-color">
+.chart-container .c3 .c3-legend-item-body text {
+}
+</style>
+
+<style id="chart-legend-target-text-color">
+.chart-container .c3 .c3-legend-item-target text {
 }
 </style>
 
@@ -284,10 +289,10 @@ Please keep one rule per style element, since they will be updated dynamically i
 		};
 
 		this.chart = {
-			linesColor: getGuiColorString('white'),
+			bodyPlotColor: getGuiColorString('white'),
+			targetPlotColor: getGuiColorString('yellow'),
 			axesColor: getGuiColorString('white'),
 			textElementsColor: getGuiColorString('white'),
-			legendTextColor: getGuiColorString('white'),
 			showPoints: true,
 			sampleInterval: 30,
 			transitionDuration: 130,
@@ -559,7 +564,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		document.getElementById("chart-axes-color").sheet.cssRules[0].style.stroke = config.chart.axesColor;
 		document.getElementById("chart-text-elements-color").sheet.cssRules[0].style.fill = config.chart.textElementsColor;
-		document.getElementById("chart-legend-text-color").sheet.cssRules[0].style.fill = config.chart.legendTextColor;
+		document.getElementById("chart-legend-body-text-color").sheet.cssRules[0].style.fill = config.chart.bodyPlotColor;
+		document.getElementById("chart-legend-target-text-color").sheet.cssRules[0].style.fill = config.chart.targetPlotColor;
 	}
 
 	function adjustOpacities() {
@@ -804,9 +810,10 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// targetExcretionFolder.add(config.targetExcretion, 'delay', 5, 120).step(1);
 
 		// let chartFolder = sceneFolder.addFolder('Chart');
+		// chartFolder.addColor(config.chart, 'bodyPlotColor').onChange(adjustColors);
+		// chartFolder.addColor(config.chart, 'targetPlotColor').onChange(adjustColors);
 		// chartFolder.addColor(config.chart, 'axesColor').onChange(adjustColors);
 		// chartFolder.addColor(config.chart, 'textElementsColor').onChange(adjustColors);
-		// chartFolder.addColor(config.chart, 'legendTextColor').onChange(adjustColors);
 		// chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
 		// chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
 		// chartFolder.add(config.chart, 'transitionDuration', 0, 400).step(1).onFinishChange(resetAnimation);
@@ -920,8 +927,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 					['target', 0],
 				],
 				colors: {
-					'body':   config.chart.linesColor,
-					'target': config.chart.linesColor,
+					'body':   config.chart.bodyPlotColor,
+					'target': config.chart.targetPlotColor,
 				},
 				names: {
 					body:   '% in FOV',
