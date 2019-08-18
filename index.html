@@ -778,7 +778,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		guiTargetZ = targetFolder.add(config.scene.target, 'z', -targetZRange, targetZRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
 		// targetFolder.add(config.scene.target, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetFolder.add(config.scene.target, 'radius', 0.02, 0.5).name('Radius').onFinishChange(resetAnimation);
-		// targetFolder.add(config.scene.target, 'viscosity', 0, 0.9);
+		// targetFolder.add(config.scene.target, 'viscosity', 0, 0.9).onFinishChange(resetAnimation);
 		// targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
 		// targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
 		// targetFolder.add(config.scene.target, 'emissiveIntensityMax', 0.2, 2).name('glowMaxValue').onFinishChange(resetAnimation);
@@ -787,7 +787,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
 		// targetCageFolder.add(config.scene.targetCage, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetCageFolder.add(config.scene.targetCage, 'radius', 0.05, 0.5).name('Radius').onFinishChange(resetAnimation);
-		// targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9);
+		// targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9).onFinishChange(resetAnimation);
 		// targetCageFolder.add(config.scene.targetCage, 'rotationSpeed', 0, 0.05);
 		// targetCageFolder.add(config.scene.targetCage, 'particleCaptureProbability', 0, 1).onFinishChange(resetAnimation);
 		// targetCageFolder.add(config.scene.targetCage, 'gravity', 0.0001, 0.1).onFinishChange(resetAnimation);
@@ -813,13 +813,13 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		let excretionFolder = sceneFolder.addFolder('FOV clearance');
 		excretionFolder.add(config.excretion, 'initialDelay', 120, 600).name('Initial delay').step(1).onFinishChange(resetAnimation);
-		excretionFolder.add(config.excretion, 'rate', 1, 100).name('Rate').step(1);
-		// excretionFolder.add(config.excretion, 'delay', 5, 120).step(1);
+		excretionFolder.add(config.excretion, 'rate', 1, 100).name('Rate').step(1).onFinishChange(resetAnimation);
+		// excretionFolder.add(config.excretion, 'delay', 5, 120).step(1).onFinishChange(resetAnimation);
 
 		let targetExcretionFolder = sceneFolder.addFolder('ROI clearance');
 		targetExcretionFolder.add(config.targetExcretion, 'initialDelay', 120, 1200).name('Initial delay').step(1).onFinishChange(resetAnimation);
-		targetExcretionFolder.add(config.targetExcretion, 'rate', 1, 50).name('Rate').step(1);
-		// targetExcretionFolder.add(config.targetExcretion, 'delay', 5, 120).step(1);
+		targetExcretionFolder.add(config.targetExcretion, 'rate', 1, 50).name('Rate').step(1).onFinishChange(resetAnimation);
+		// targetExcretionFolder.add(config.targetExcretion, 'delay', 5, 120).step(1).onFinishChange(resetAnimation);
 
 		// let chartFolder = sceneFolder.addFolder('Chart');
 		// chartFolder.addColor(config.chart, 'bodyPlotColor').onChange(adjustColors);
@@ -827,7 +827,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// chartFolder.addColor(config.chart, 'axesColor').onChange(adjustColors);
 		// chartFolder.addColor(config.chart, 'textElementsColor').onChange(adjustColors);
 		// chartFolder.add(config.chart, 'showPoints').onChange(toggleChartPoints);
-		// chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1);
+		// chartFolder.add(config.chart, 'sampleInterval', 10, 180).step(1).onFinishChange(resetAnimation);
 		// chartFolder.add(config.chart, 'transitionDuration', 0, 400).step(1).onFinishChange(resetAnimation);
 		// chartFolder.add(config.chart, 'exclusivePlots').onFinishChange(resetAnimation);
 
