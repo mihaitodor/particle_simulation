@@ -290,6 +290,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 			particles: {
 				color: '#00a4ff',
 				changeColor: true,
+				particlesInvisibleInBox: false,
 				colorInTarget: getGuiColorString('red'),
 				radius: 0.01,
 				count: 3000,
@@ -398,6 +399,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 	function excreteParticle(p) {
 		p.isInTarget = false;
 		p.isExcreted = true;
+		p.visible = true;
 
 		p.position.x = box.geometry.parameters.width / 2 + config.scene.tubes.height;
 		p.position.y = -config.scene.box.height / 2 * config.scene.tubes.verticalDisplacement;
@@ -421,7 +423,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 			for (let i = 0; i < batch.length; i++) {
 				let p = batch[i];
-				p.visible = true;
+				p.visible = !config.scene.particles.particlesInvisibleInBox;
 				p.position.add(p.velocity); // Start moving the particles as soon as they become visible
 				visibleParticles.push(p);
 			}
@@ -449,6 +451,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 			if (p.isInTarget || target.geometry.boundingSphere.containsPoint(p.position)) {
 				if (!p.isInTarget) {
 					p.isInTarget = true;
+					p.visible = true;
 					if (config.scene.particles.changeColor) {
 						p.material.color.set(config.scene.particles.colorInTarget);
 					}
@@ -478,6 +481,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 				}
 
 				if (config.scene.targetCage.cageEnabled && (targetCage.geometry.boundingSphere.containsPoint(p.position))) {
+					p.visible = true;
+
 					// Get the vector from the target center to the particle
 					let positionDirection = target.position.clone().sub(p.position);
 
@@ -501,6 +506,12 @@ Please keep one rule per style element, since they will be updated dynamically i
 						p.visible = false;
 					} else {
 						p.position.add(p.velocity);
+						if (config.scene.targetCage.cageEnabled && !p.isExcreted && !targetCage.geometry.boundingSphere.containsPoint(p.position)) {
+							p.visible = !config.scene.particles.particlesInvisibleInBox;
+							p.material.opacity = config.scene.particles.opacity;
+						} else if (p.isExcreted) {
+							p.material.opacity = 1;
+						}
 					}
 				}
 
@@ -578,6 +589,16 @@ Please keep one rule per style element, since they will be updated dynamically i
 		document.getElementById("chart-text-elements-color").sheet.cssRules[0].style.fill = config.chart.textElementsColor;
 		document.getElementById("chart-legend-body-text-color").sheet.cssRules[0].style.fill = config.chart.bodyPlotColor;
 		document.getElementById("chart-legend-target-text-color").sheet.cssRules[0].style.fill = config.chart.targetPlotColor;
+	}
+
+	function toggleParticlesInBoxVisibility() {
+		for (let i = 0; i < visibleParticles.length; i++) {
+			let p = particles[i];
+
+			if (!p.isInTarget && !p.isExcreted) {
+				p.visible = !config.scene.particles.particlesInvisibleInBox;
+			}
+		}
 	}
 
 	function adjustOpacities() {
@@ -803,6 +824,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		let particlesFolder = sceneFolder.addFolder('Fluorescent agent');
 		// particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'changeColor').name('Off/On responsive').title('Flu off/on response enabled').onFinishChange(adjustColors);
+		particlesFolder.add(config.scene.particles, 'particlesInvisibleInBox').name('Invisible in FOV').onFinishChange(toggleParticlesInBoxVisibility);
 		// particlesFolder.addColor(config.scene.particles, 'colorInTarget').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'radius', 0.001, 0.02).name('Radius').onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'count', 1, 10000).name('Count').step(1).onFinishChange(resetAnimation);
