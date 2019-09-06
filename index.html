@@ -293,7 +293,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 				particlesInvisibleInBox: false,
 				colorInTarget: getGuiColorString('red'),
 				radius: 0.01,
-				opacity: 0.1,
+				opacityInBox: 0.1,
 				count: 3000,
 				batchSize: 100,
 				batchDelay: 5,
@@ -510,7 +510,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 						p.position.add(p.velocity);
 						if (config.scene.targetCage.cageEnabled && !p.isExcreted && !targetCage.geometry.boundingSphere.containsPoint(p.position)) {
 							p.visible = !config.scene.particles.particlesInvisibleInBox;
-							p.material.opacity = config.scene.particles.opacity;
+							p.material.opacity = config.scene.particles.opacityInBox;
 						} else if (p.isExcreted) {
 							p.material.opacity = 1;
 						}
@@ -611,7 +611,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		for (let i = 0; i < visibleParticles.length; i++) {
 			let p = particles[i];
 			if (!p.isInTarget && !p.isExcreted) {
-				p.material.opacity = config.scene.particles.opacity;
+				p.material.opacity = config.scene.particles.opacityInBox;
 			}
 		}
 	}
@@ -837,7 +837,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// particlesFolder.addColor(config.scene.particles, 'colorInTarget').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'radius', 0.001, 0.02).name('Radius').onFinishChange(resetAnimation);
 		particlesFolder.add(config.scene.particles, 'count', 1, 10000).name('Count').step(1).onFinishChange(resetAnimation);
-		particlesFolder.add(config.scene.particles, 'opacity', 0, 1).name('Opacity').onChange(adjustOpacities);
+		particlesFolder.add(config.scene.particles, 'opacityInBox', 0, 1).name('Opacity').onChange(adjustOpacities);
 		// particlesFolder.add(config.scene.particles, 'batchSize', 1, 100).step(1).onFinishChange(resetAnimation);
 		// particlesFolder.add(config.scene.particles, 'batchDelay', 5, 120).step(1).onFinishChange(resetAnimation);
 		// particlesFolder.add(config.scene.particles, 'velocityMin', SCENE_SCALE / 2000, SCENE_SCALE / 500).onFinishChange(resetAnimation);
@@ -902,7 +902,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 					geometry,
 					new THREE.MeshBasicMaterial({
 						color: config.scene.particles.color,
-						opacity: config.scene.particles.opacity,
+						opacity: config.scene.particles.opacityInBox,
 						transparent: true,
 					}),
 				),
