@@ -335,7 +335,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 	let box, boxEdges, targetCage, target, inputTube, inputTubeEdges, outputTube, outputTubeEdges, particles = [], particleBatches = [], visibleParticles = [], particlesInBox = 0, particlesInTarget = 0, currentParticleBatch = 0;
 
 	// GUI controls that need to be refreshed when adjusting sizes
-	let guiTargetX, guiTargetY, guiTargetZ;
+	let guiTargetCageRadius, guiTargetRadius, guiTargetX, guiTargetY, guiTargetZ;
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
@@ -641,7 +641,18 @@ Please keep one rule per style element, since they will be updated dynamically i
 		return output
 	}
 
-	function adjustTargetGUIRanges() {
+	function adjustGUIRanges() {
+		if (!guiTargetCageRadius || !guiTargetRadius) {
+			return;
+		}
+
+		guiTargetCageRadius.min(config.scene.target.radius).updateDisplay();
+		guiTargetRadius.max(config.scene.targetCage.radius).updateDisplay();
+
+		if (!guiTargetX || !targetYRange || !targetZRange) {
+			return;
+		}
+
 		let targetXRange = getTargetPositionRange(config.scene.box.width);
 		guiTargetX.min(-targetXRange).max(targetXRange).updateDisplay();
 
@@ -678,7 +689,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		adjustColors();
 
-		// adjustTargetGUIRanges();
+		adjustGUIRanges();
 
 		// Restart the animation
 		renderLoop();
@@ -798,6 +809,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		let targetFolder = sceneFolder.addFolder('ROI');
 		// targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
 		// dat.gui sets the implicit step value to 1 for x, y and z due to their initial value
+		// TODO: Adjust the ranges for guiTargetRadius and guiTargetCageRadius dynamically when re-enabling these
 		// let targetXRange = getTargetPositionRange(config.scene.box.width);
 		// guiTargetX = targetFolder.add(config.scene.target, 'x', -targetXRange, targetXRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
 		// let targetYRange = getTargetPositionRange(config.scene.box.height);
@@ -805,7 +817,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// let targetZRange = getTargetPositionRange(config.scene.box.depth);
 		// guiTargetZ = targetFolder.add(config.scene.target, 'z', -targetZRange, targetZRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
 		// targetFolder.add(config.scene.target, 'opacity', 0.01, 1).onChange(adjustOpacities);
-		targetFolder.add(config.scene.target, 'radius', 0.02, 0.5).name('Radius').onFinishChange(resetAnimation);
+		guiTargetRadius = targetFolder.add(config.scene.target, 'radius', 0.02, config.scene.targetCage.radius).name('Radius').onFinishChange(resetAnimation);
 		// targetFolder.add(config.scene.target, 'viscosity', 0, 0.9).onFinishChange(resetAnimation);
 		// targetFolder.add(config.scene.target, 'shininess', 0, 100).onChange(adjustTargetShininess);
 		// targetFolder.addColor(config.scene.target, 'emissiveColor').name('glowColor').onChange(adjustColors);
@@ -814,7 +826,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 		let targetCageFolder = sceneFolder.addFolder('EPR zone');
 		// targetCageFolder.addColor(config.scene.targetCage, 'color').onChange(adjustColors);
 		// targetCageFolder.add(config.scene.targetCage, 'opacity', 0.01, 1).onChange(adjustOpacities);
-		targetCageFolder.add(config.scene.targetCage, 'radius', 0.05, 0.5).name('Radius').onFinishChange(resetAnimation);
+		let maxTargetCageRadius = Math.min(config.scene.box.width, config.scene.box.height, config.scene.box.depth) / 2;
+		guiTargetCageRadius = targetCageFolder.add(config.scene.targetCage, 'radius', config.scene.target.radius, maxTargetCageRadius).name('Radius').onFinishChange(resetAnimation);
 		// targetCageFolder.add(config.scene.targetCage, 'viscosity', 0, 0.9).onFinishChange(resetAnimation);
 		// targetCageFolder.add(config.scene.targetCage, 'rotationSpeed', 0, 0.05);
 		// targetCageFolder.add(config.scene.targetCage, 'particleCaptureProbability', 0, 1).onFinishChange(resetAnimation);
