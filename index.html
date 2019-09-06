@@ -484,7 +484,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 				if (config.scene.targetCage.cageEnabled && (targetCage.geometry.boundingSphere.containsPoint(p.position))) {
 					p.visible = true;
-					// p.material.opacity = 1;
 
 					// Get the vector from the target center to the particle
 					let positionDirection = target.position.clone().sub(p.position);
