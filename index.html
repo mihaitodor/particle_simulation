@@ -143,9 +143,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 		  "cageEnabled": true
 		},
 		"5": {
-		  "x": 0,
-		  "y": 0,
-		  "z": 0,
 		  "radius": 0.05
 		},
 		"6": {},
@@ -181,9 +178,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 		  "cageEnabled": false
 		},
 		"5": {
-		  "x": 0,
-		  "y": 0,
-		  "z": 0,
 		  "radius": 0.05
 		},
 		"6": {},
@@ -682,7 +676,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		adjustColors();
 
-		adjustTargetGUIRanges();
+		// adjustTargetGUIRanges();
 
 		// Restart the animation
 		renderLoop();
@@ -802,12 +796,12 @@ Please keep one rule per style element, since they will be updated dynamically i
 		let targetFolder = sceneFolder.addFolder('ROI');
 		// targetFolder.addColor(config.scene.target, 'color').onChange(adjustColors);
 		// dat.gui sets the implicit step value to 1 for x, y and z due to their initial value
-		let targetXRange = getTargetPositionRange(config.scene.box.width);
-		guiTargetX = targetFolder.add(config.scene.target, 'x', -targetXRange, targetXRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
-		let targetYRange = getTargetPositionRange(config.scene.box.height);
-		guiTargetY = targetFolder.add(config.scene.target, 'y', -targetYRange, targetYRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
-		let targetZRange = getTargetPositionRange(config.scene.box.depth);
-		guiTargetZ = targetFolder.add(config.scene.target, 'z', -targetZRange, targetZRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
+		// let targetXRange = getTargetPositionRange(config.scene.box.width);
+		// guiTargetX = targetFolder.add(config.scene.target, 'x', -targetXRange, targetXRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
+		// let targetYRange = getTargetPositionRange(config.scene.box.height);
+		// guiTargetY = targetFolder.add(config.scene.target, 'y', -targetYRange, targetYRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
+		// let targetZRange = getTargetPositionRange(config.scene.box.depth);
+		// guiTargetZ = targetFolder.add(config.scene.target, 'z', -targetZRange, targetZRange).step(0.0001).onChange(adjustTargetPosition).onFinishChange(resetAnimation);
 		// targetFolder.add(config.scene.target, 'opacity', 0.01, 1).onChange(adjustOpacities);
 		targetFolder.add(config.scene.target, 'radius', 0.02, 0.5).name('Radius').onFinishChange(resetAnimation);
 		// targetFolder.add(config.scene.target, 'viscosity', 0, 0.9).onFinishChange(resetAnimation);
