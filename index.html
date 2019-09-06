@@ -605,7 +605,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		targetCage.material.opacity = config.scene.targetCage.opacity;
 		target.material.opacity = config.scene.target.opacity;
 
-		for (let i = 0; i < visibleParticles.length; i++) {
+		for (let i = 0; i < particles.length; i++) {
 			let p = particles[i];
 			if (!p.isInTarget && !p.isExcreted) {
 				p.material.transparent = config.scene.particles.changeColor
