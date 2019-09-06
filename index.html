@@ -728,7 +728,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 	function saveData() {
 		// Set the header of the CSV file
-		var payload = 'Body,Target';
+		var payload = '"% FOV","% ROI","Time interval"';
 
 		let bodyValues = chart.data('body')[0].values;
 		let targetValues = chart.data('target')[0].values;
@@ -736,7 +736,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// Write the values wrapped in quotes, just in case some computer locale
 		// uses commas as the decimal separator.
 		for (var i = 0; i < bodyValues.length; i++) {
-			payload += '\n"' + bodyValues[i].value.toString() + '","' + targetValues[i].value.toString() + '"';
+			payload += '\n"' + bodyValues[i].value.toString() + '","' + targetValues[i].value.toString() + '","' + (i+1).toString() + '"';
 		}
 
 		// Create a dummy anchor element
