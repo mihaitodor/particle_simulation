@@ -10,17 +10,18 @@
 
 Follow the link for more information: [http://c3js.org](http://c3js.org/)
 
-## Tutorial and Examples
+## Documentation
 
 + [Getting Started](http://c3js.org/gettingstarted.html)
 + [Examples](http://c3js.org/examples.html)
++ [Full API Reference](https://c3js.org/reference.html)
 
 Additional samples can be found in this repository:
 + [https://github.com/c3js/c3/tree/master/htdocs/samples](https://github.com/c3js/c3/tree/master/htdocs/samples)
 
 You can run these samples as:
 ```
-$ npm start
+$ npm run serve-static
 ```
 
 ## Google Group
