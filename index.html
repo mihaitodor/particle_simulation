@@ -397,6 +397,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		p.isInTarget = false;
 		p.isExcreted = true;
 		p.visible = true;
+		p.material.opacity = 1;
 
 		p.position.x = box.geometry.parameters.width / 2 + config.scene.tubes.height;
 		p.position.y = -config.scene.box.height / 2 * config.scene.tubes.verticalDisplacement;
@@ -507,8 +508,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 						if (config.scene.targetCage.cageEnabled && !p.isExcreted && !targetCage.geometry.boundingSphere.containsPoint(p.position)) {
 							p.visible = !config.scene.particles.particlesInvisibleInBox;
 							p.material.opacity = config.scene.particles.opacityInBox;
-						} else if (p.isExcreted) {
-							p.material.opacity = 1;
 						}
 					}
 				}
@@ -600,6 +599,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 	}
 
 	function adjustOpacities() {
+		adjustColors();
+
 		box.material.opacity = config.scene.box.opacity;
 		targetCage.material.opacity = config.scene.targetCage.opacity;
 		target.material.opacity = config.scene.target.opacity;
@@ -607,6 +608,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		for (let i = 0; i < visibleParticles.length; i++) {
 			let p = particles[i];
 			if (!p.isInTarget && !p.isExcreted) {
+				p.material.transparent = config.scene.particles.changeColor
 				p.material.opacity = config.scene.particles.opacityInBox;
 			}
 		}
@@ -828,7 +830,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		let particlesFolder = sceneFolder.addFolder('Fluorescent agent');
 		// particlesFolder.addColor(config.scene.particles, 'color').onChange(adjustColors);
-		particlesFolder.add(config.scene.particles, 'changeColor').name('Off/On responsive').title('Flu off/on response enabled').onFinishChange(adjustColors);
+		particlesFolder.add(config.scene.particles, 'changeColor').name('Off/On responsive').title('Flu off/on response enabled').onFinishChange(adjustOpacities);
 		particlesFolder.add(config.scene.particles, 'particlesInvisibleInBox').name('Invisible in FOV').onFinishChange(toggleParticlesInBoxVisibility);
 		// particlesFolder.addColor(config.scene.particles, 'colorInTarget').onChange(adjustColors);
 		particlesFolder.add(config.scene.particles, 'radius', 0.001, 0.02).name('Radius').onFinishChange(resetAnimation);
@@ -899,7 +901,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 					new THREE.MeshBasicMaterial({
 						color: config.scene.particles.color,
 						opacity: config.scene.particles.opacityInBox,
-						transparent: true,
+						transparent: config.scene.particles.changeColor,
 					}),
 				),
 			);
