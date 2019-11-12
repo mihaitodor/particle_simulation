@@ -1009,6 +1009,10 @@ Please keep one rule per style element, since they will be updated dynamically i
 				text: '% FOV / ROI distributions over time',
 			},
 		});
+		let c = document.getElementById('chart');
+		if (c.style.visibility && c.style.visibility != 'visible') {
+			c.style.visibility = 'visible';
+		}
 	}
 
 	function init() {
