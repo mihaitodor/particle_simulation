@@ -324,8 +324,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 			rate: 4,
 			delay: 40,
 		};
-
-		this.pauseAnimation = false;
 	};
 
 	// Handles which need to be accessed when rendering frames
@@ -339,6 +337,10 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 	// Keep track of elapsed frames
 	let elapsed = 0;
+
+	// Hack: Attach pauseAnimation to the `window` global, so we
+	// can pass the `window` object to gui.add()
+	window.pauseAnimation = false;
 
 	function getGuiColorString(color) {
 		return '#' + new THREE.Color(color).getHexString();
@@ -407,7 +409,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 	}
 
 	function updateObjects() {
-		if (config.pauseAnimation) {
+		if (window.pauseAnimation) {
 			return;
 		}
 
@@ -878,9 +880,17 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		// gui.add({ toggle: toggleStats }, 'toggle').name('Toggle stats');
 
-		gui.add(config, 'pauseAnimation').name('Pause simulation');
+		let pause = gui.add(window, 'pauseAnimation').name('Pause simulation').listen();
+		pause.isModified = function() { return false; };
 
-		gui.add({ reset: resetAnimation }, 'reset').name('Reset simulation');
+		gui.add({ reset: resetAnimation }, 'reset').name('Restart simulation').onChange(function() {
+			// Unpause animation when this button is pressed
+			window.pauseAnimation = false;
+		});
+
+		// Hack: Also unpause animation when changing presets
+		let select = document.getElementsByClassName('save-row')[0].getElementsByTagName('select')[0];
+		dat.dom.dom.bind(select, 'change', function () { window.pauseAnimation = false; })
 
 		gui.add({ save: saveData }, 'save').name('Save data');
 	}
