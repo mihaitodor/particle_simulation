@@ -333,6 +333,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 		}
 	};
 
+	const originalPresets = Object.keys(presets.remembered);
+
 	const SCENE_SCALE = 1;
 
 	let Config = function() {
@@ -838,19 +840,19 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 	function saveData() {
 		// Set the header of the CSV file
-		var payload = '"% FOV","% ROI","Time interval"';
+		let payload = '"% FOV","% ROI","Time interval"';
 
 		let bodyValues = chart.data('body')[0].values;
 		let targetValues = chart.data('target')[0].values;
 
 		// Write the values wrapped in quotes, just in case some computer locale
 		// uses commas as the decimal separator.
-		for (var i = 0; i < bodyValues.length; i++) {
+		for (let i = 0; i < bodyValues.length; i++) {
 			payload += '\n"' + bodyValues[i].value.toString() + '","' + targetValues[i].value.toString() + '","' + (i+1).toString() + '"';
 		}
 
 		// Create a dummy anchor element
-		var downloadAnchor = window.document.createElement('a');
+		let downloadAnchor = window.document.createElement('a');
 		downloadAnchor.href = window.URL.createObjectURL(new Blob([payload], { type: 'text/csv' }));
 		downloadAnchor.download = 'data.csv';
 
@@ -868,7 +870,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		// Inspired from https://stackoverflow.com/questions/27362914/how-to-add-tooltips-to-dat-gui
 		// dat.GUI copies the prototype of superclass Controller to all other controllers so it
 		// is not enough to add it only to the super class as the reference is not maintained.
-		for (var controllerName in dat.controllers) {
+		for (let controllerName in dat.controllers) {
 			if (dat.controllers.hasOwnProperty(controllerName)) {
 				if (!dat.controllers[controllerName].prototype.hasOwnProperty('title')) {
 					dat.controllers[controllerName].prototype.title = function(v) {
@@ -988,6 +990,21 @@ Please keep one rule per style element, since they will be updated dynamically i
 		dat.dom.dom.bind(select, 'change', function () { window.pauseAnimation = false; })
 
 		gui.add({ save: saveData }, 'save').name('Save data');
+
+		// Disable overwriting of existing presets
+		let originalSaveButton = document.getElementsByClassName('save')[0];
+		let saveButton = originalSaveButton.cloneNode(true);
+		originalSaveButton.parentNode.replaceChild(saveButton, originalSaveButton);
+		saveButton.addEventListener('click', function() {
+			var selectedPreset = select.options[select.selectedIndex].value;
+
+			if (originalPresets.includes(selectedPreset)) {
+				alert('Can\'t overwrite original presets.');
+				return;
+			}
+
+			gui.save();
+		}, false);
 	}
 
 	function initParticle(p) {
@@ -1280,7 +1297,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 	// Code ripped off from here https://github.com/mrdoob/three.js/issues/5175#issuecomment-316744586
 	function disposeObject(obj, unset=false) {
 		if (obj !== null) {
-			for (var i = 0; i < obj.children.length; i++) {
+			for (let i = 0; i < obj.children.length; i++) {
 				disposeObject(obj.children[i], true);
 			}
 
