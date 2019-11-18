@@ -542,6 +542,9 @@ Please keep one rule per style element, since they will be updated dynamically i
 				length: 0,
 			});
 		}
+
+		// Advance to the next frame
+		elapsed += 1;
 	}
 
 	function renderLoop() {
@@ -552,8 +555,6 @@ Please keep one rule per style element, since they will be updated dynamically i
 		renderer.render(scene, camera);
 		controls.update();
 		stats.update();
-
-		elapsed += 1;
 	}
 
 	function adjustColors() {
