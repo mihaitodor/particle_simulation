@@ -123,121 +123,215 @@ Please keep one rule per style element, since they will be updated dynamically i
 <script>
 	"use strict";
 
-	let presets =
-{
-	"preset": "Default",
-	"remembered": {
-	  "Default": {
-		"0": {
-		  "pauseAnimation": false
-		},
-		"1": {},
-		"2": {},
-		"3": {
-		  "width": 0.6,
-		  "height": 1.8,
-		  "depth": 0.6
-		},
-		"4": {
-		  "radius": 0.08,
-		  "cageEnabled": true
-		},
-		"5": {
-		  "radius": 0.05
-		},
-		"6": {},
-		"7": {
-		  "changeColor": true,
-		  "particlesInvisibleInBox": false,
-		  "radius": 0.01,
-		  "count": 3000
-		},
-		"8": {},
-		"9": {
-		  "initialDelay": 250,
-		  "rate": 20
-		},
-		"10": {
-		  "initialDelay": 480,
-		  "rate": 4
+	let presets = {
+		"preset": "Sim-1",
+		"remembered": {
+			"Sim-1": {
+				"0": {},
+				"1": {},
+				"2": {},
+				"3": {
+					"width": 0.6,
+					"height": 1.6,
+					"depth": 0.4
+				},
+				"4": {
+					"radius": 0.08,
+					"cageEnabled": false
+				},
+				"5": {
+					"radius": 0.04
+				},
+				"6": {},
+				"7": {
+					"changeColor": false,
+					"particlesInvisibleInBox": false,
+					"radius": 0.004,
+					"count": 5000
+				},
+				"8": {},
+				"9": {},
+				"10": {
+					"initialDelay": 250,
+					"rate": 50
+				},
+				"11": {
+					"initialDelay": 500,
+					"rate": 25
+				}
+			},
+			"Sim-2": {
+				"0": {},
+				"1": {},
+				"2": {},
+				"3": {
+					"width": 0.6,
+					"height": 1.6,
+					"depth": 0.4
+				},
+				"4": {
+					"radius": 0.08,
+					"cageEnabled": false
+				},
+				"5": {
+					"radius": 0.04
+				},
+				"6": {},
+				"7": {
+					"changeColor": false,
+					"particlesInvisibleInBox": false,
+					"radius": 0.004,
+					"count": 5000
+				},
+				"8": {},
+				"9": {},
+				"10": {
+					"initialDelay": 250,
+					"rate": 25
+				},
+				"11": {
+					"initialDelay": 750,
+					"rate": 10
+				}
+			},
+			"Sim-3": {
+				"0": {},
+				"1": {},
+				"2": {},
+				"3": {
+					"width": 0.6,
+					"height": 1.6,
+					"depth": 0.4
+				},
+				"4": {
+					"radius": 0.08,
+					"cageEnabled": false
+				},
+				"5": {
+					"radius": 0.04
+				},
+				"6": {},
+				"7": {
+					"changeColor": true,
+					"particlesInvisibleInBox": false,
+					"radius": 0.004,
+					"count": 5000
+				},
+				"8": {},
+				"9": {},
+				"10": {
+					"initialDelay": 250,
+					"rate": 50
+				},
+				"11": {
+					"initialDelay": 500,
+					"rate": 20
+				}
+			},
+			"Sim-4": {
+				"0": {},
+				"1": {},
+				"2": {},
+				"3": {
+					"width": 0.6,
+					"height": 1.6,
+					"depth": 0.4
+				},
+				"4": {
+					"radius": 0.08,
+					"cageEnabled": false
+				},
+				"5": {
+					"radius": 0.04
+				},
+				"6": {},
+				"7": {
+					"changeColor": true,
+					"particlesInvisibleInBox": false,
+					"radius": 0.003,
+					"count": 5000
+				},
+				"8": {},
+				"9": {},
+				"10": {
+					"initialDelay": 250,
+					"rate": 25
+				},
+				"11": {
+					"initialDelay": 750,
+					"rate": 10
+				}
+			},
+			"Sim-5": {
+				"0": {},
+				"1": {},
+				"2": {},
+				"3": {
+					"width": 0.6,
+					"height": 1.6,
+					"depth": 0.4
+				},
+				"4": {
+					"radius": 0.08,
+					"cageEnabled": true
+				},
+				"5": {
+					"radius": 0.04
+				},
+				"6": {},
+				"7": {
+					"changeColor": false,
+					"particlesInvisibleInBox": false,
+					"radius": 0.004,
+					"count": 5000
+				},
+				"8": {},
+				"9": {},
+				"10": {
+					"initialDelay": 250,
+					"rate": 25
+				},
+				"11": {
+					"initialDelay": 750,
+					"rate": 10
+				}
+			},
+			"Sim-6": {
+				"0": {},
+				"1": {},
+				"2": {},
+				"3": {
+					"width": 0.6,
+					"height": 1.6,
+					"depth": 0.4
+				},
+				"4": {
+					"radius": 0.08,
+					"cageEnabled": true
+				},
+				"5": {
+					"radius": 0.04
+				},
+				"6": {},
+				"7": {
+					"changeColor": true,
+					"particlesInvisibleInBox": false,
+					"radius": 0.004,
+					"count": 5000
+				},
+				"8": {},
+				"9": {},
+				"10": {
+					"initialDelay": 250,
+					"rate": 25
+				},
+				"11": {
+					"initialDelay": 750,
+					"rate": 10
+				}
+			}
 		}
-	  },
-	  "Simulation 1": {
-		"0": {
-		  "pauseAnimation": false
-		},
-		"1": {},
-		"2": {},
-		"3": {
-		  "width": 0.6,
-		  "height": 1.63,
-		  "depth": 0.4
-		},
-		"4": {
-		  "radius": 0.08,
-		  "cageEnabled": false
-		},
-		"5": {
-		  "radius": 0.05
-		},
-		"6": {},
-		"7": {
-		  "changeColor": true,
-		  "particlesInvisibleInBox": false,
-		  "radius": 0.01,
-		  "count": 3000
-		},
-		"8": {},
-		"9": {
-		  "initialDelay": 250,
-		  "rate": 20
-		},
-		"10": {
-		  "initialDelay": 480,
-		  "rate": 4
-		}
-	  }
-	},
-	"closed": false,
-	"folders": {
-	  "Simulation settings": {
-		"preset": "Default",
-		"closed": false,
-		"folders": {
-		  "FOV": {
-			"preset": "Default",
-			"closed": true,
-			"folders": {}
-		  },
-		  "ROI": {
-			"preset": "Default",
-			"closed": true,
-			"folders": {}
-		  },
-		  "EPR zone": {
-			"preset": "Default",
-			"closed": true,
-			"folders": {}
-		  },
-		  "Fluorescent agent": {
-			"preset": "Default",
-			"closed": true,
-			"folders": {}
-		  },
-		  "FOV clearance": {
-			"preset": "Default",
-			"closed": true,
-			"folders": {}
-		  },
-		  "ROI clearance": {
-			"preset": "Default",
-			"closed": true,
-			"folders": {}
-		  }
-		}
-	  }
-	}
-  };
+	};
 
 	const SCENE_SCALE = 1;
 
@@ -251,8 +345,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 				edgesColor: '#f7ebeb',
 				opacity: 0.3,
 				width: 0.6,
-				height: 1.8,
-				depth: 0.6,
+				height: 1.6,
+				depth: 0.4,
 			},
 			targetCage: {
 				color: getGuiColorString('gray'),
@@ -262,7 +356,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 				rotationSpeed: 0.005,
 				particleCaptureProbability: 0.5,
 				gravity: 0.05,
-				cageEnabled: true,
+				cageEnabled: false,
 			},
 			target: {
 				x: 0,
@@ -270,7 +364,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 				z: 0,
 				color: getGuiColorString('red'),
 				opacity: 0.07,
-				radius: 0.05,
+				radius: 0.04,
 				viscosity: 0.155,
 				shininess: 50,
 				emissiveColor: getGuiColorString('springgreen'),
@@ -285,12 +379,12 @@ Please keep one rule per style element, since they will be updated dynamically i
 			},
 			particles: {
 				color: '#00a4ff',
-				changeColor: true,
+				changeColor: false,
 				particlesInvisibleInBox: false,
 				colorInTarget: getGuiColorString('red'),
-				radius: 0.01,
+				radius: 0.004,
 				opacityInBox: 0.15,
-				count: 3000,
+				count: 5000,
 				batchSize: 100,
 				batchDelay: 5,
 				velocityMin: SCENE_SCALE / 1000,
@@ -315,13 +409,13 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		this.excretion = {
 			initialDelay: 250,
-			rate: 20,
+			rate: 50,
 			delay: 20,
 		};
 
 		this.targetExcretion = {
-			initialDelay: 480,
-			rate: 4,
+			initialDelay: 500,
+			rate: 25,
 			delay: 40,
 		};
 	};
@@ -859,12 +953,12 @@ Please keep one rule per style element, since they will be updated dynamically i
 
 		let excretionFolder = sceneFolder.addFolder('FOV clearance');
 		excretionFolder.add(config.excretion, 'initialDelay', 120, 600).name('Initial delay').step(1).onFinishChange(resetAnimation);
-		excretionFolder.add(config.excretion, 'rate', 1, 100).name('Rate').step(1).onFinishChange(resetAnimation);
+		excretionFolder.add(config.excretion, 'rate', 1, 250).name('Rate').step(1).onFinishChange(resetAnimation);
 		// excretionFolder.add(config.excretion, 'delay', 5, 120).step(1).onFinishChange(resetAnimation);
 
 		let targetExcretionFolder = sceneFolder.addFolder('ROI clearance');
 		targetExcretionFolder.add(config.targetExcretion, 'initialDelay', 120, 1200).name('Initial delay').step(1).onFinishChange(resetAnimation);
-		targetExcretionFolder.add(config.targetExcretion, 'rate', 1, 50).name('Rate').step(1).onFinishChange(resetAnimation);
+		targetExcretionFolder.add(config.targetExcretion, 'rate', 1, 250).name('Rate').step(1).onFinishChange(resetAnimation);
 		// targetExcretionFolder.add(config.targetExcretion, 'delay', 5, 120).step(1).onFinishChange(resetAnimation);
 
 		// let chartFolder = sceneFolder.addFolder('Chart');
