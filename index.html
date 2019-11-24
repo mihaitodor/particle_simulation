@@ -98,6 +98,62 @@ html, body {
 	background-color: #bab19e;
 }
 
+.info-wrapper {
+	position: fixed;
+	display: none;
+	z-index: 1;
+	opacity: 0;
+	background-color: rgba(0, 0, 0, 0.8);
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	transition: opacity .2s linear;
+}
+
+#info {
+	position: fixed;
+	display: none;
+	z-index: 2;
+	opacity: 0;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%) scale(1.1);
+	width: 460px;
+	padding: 15px;
+	color: #eee;
+	background-color: #222;
+	font: 13px 'Lucida Grande', sans-serif;
+	white-space: pre-line;
+	transition: transform .2s ease-out 0s, opacity .2s linear 0s;
+}
+
+#info a {
+	color: #0000ee;
+	display: inline-block;
+	position: relative;
+	text-decoration: none;
+}
+
+#info a:before {
+	background-color: #0000ee;
+	content: '';
+	height: 2px;
+	position: absolute;
+	bottom: -2px;
+	transition: width 0.3s ease-in-out;
+	width: 100%;
+}
+
+#info a:hover:before {
+	width: 0;
+}
+
+#info button {
+	margin: 0 auto;
+	display: block;
+}
+
 </style>
 
 <!--
@@ -908,6 +964,27 @@ Please keep one rule per style element, since they will be updated dynamically i
 		document.body.removeChild(downloadAnchor);
 	}
 
+	function toggleInfo() {
+		let infoBox = document.getElementById('info');
+		if (!infoBox.style.display || infoBox.style.display === 'none') {
+			infoBox.style.display = 'block';
+			infoBox.parentNode.style.display = 'block';
+			window.setTimeout(function(){
+				infoBox.style.opacity = 1;
+				infoBox.style.transform = 'translate(-50%, -50%) scale(1)';
+				infoBox.parentNode.style.opacity = 1;
+			}, 25); // Fire the animation with a slight delay because otherwise the browser might skip it
+		} else {
+			infoBox.style.opacity = 0;
+			infoBox.style.transform = 'translate(-50%, -50%) scale(1.1)';
+			infoBox.parentNode.style.opacity = 0;
+			window.setTimeout(function(){
+				infoBox.style.display = 'none';
+				infoBox.parentNode.style.display = 'none';
+			}, 200);
+		}
+	}
+
 	function initGUI() {
 		// Inspired from https://stackoverflow.com/questions/27362914/how-to-add-tooltips-to-dat-gui
 		// dat.GUI copies the prototype of superclass Controller to all other controllers so it
@@ -1032,6 +1109,8 @@ Please keep one rule per style element, since they will be updated dynamically i
 		dat.dom.dom.bind(select, 'change', function () { window.pauseAnimation = false; })
 
 		gui.add({ save: saveData }, 'save').name('Save data');
+
+		gui.add({ info: toggleInfo }, 'info').name('Info');
 
 		// Disable overwriting of existing presets
 		let originalSaveButton = document.getElementsByClassName('save')[0];
@@ -1383,5 +1462,14 @@ Please keep one rule per style element, since they will be updated dynamically i
 			<div id="chart"></div>
 		</div>
 	</div>
+	<div class="info-wrapper" onclick="toggleInfo()">
+		<div id="info" onclick="event.stopPropagation();">
+			© <a href="https://www.rcsi.com/dublin/about/faculty-of-medicine-and-health-sciences/academic-departments/chemistry">Department Of Chemistry</a>, Royal College of Surgeons in Ireland, 2019
+
+			Source code: <a href="https://github.com/mihaitodor/particle_simulation">https://github.com/mihaitodor/particle_simulation</a>
+
+
+			<button onclick="toggleInfo()">Close</button></div>
+	<div>
 </body>
 </html>
