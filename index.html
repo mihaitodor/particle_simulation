@@ -50,12 +50,35 @@ html, body {
 	left: 0;
 	bottom: 25%;
 }
-</style>
 
-<style id="gui-number-input-text-color">
+.dg
+.dg input,
+.dg .title,
+.dg .close-button,
+.dg .property-name,
+.dg .save-row select,
+.dg .save-row .button {
+	font-size: 15px !important;
+}
+
+.dg .c input[type=text] {
+	padding-top: 0px;
+	padding-bottom: 2px;
+	height: 17px;
+}
+
 .dg .cr.number input[type=text] {
     color: white;
 }
+
+.dg .save-row {
+	line-height: 30px !important;
+}
+
+.dg .save-row select {
+	width: 152px !important;
+}
+
 </style>
 
 <!--
@@ -406,7 +429,7 @@ Please keep one rule per style element, since they will be updated dynamically i
 		};
 
 		this.gui = {
-			width: 270,
+			width: 380,
 		};
 
 		this.excretion = {
