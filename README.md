@@ -2,7 +2,7 @@
 
 This simulation can be run online [here]( https://mihaitodor.github.io/particle_simulation/index.html). For details, please consult the following paper:
 
-> Daly, Harrison C.; Conroy, Emer; Todor, Mihai; Wu, Dan; Gallagher, William M; O'Shea, Donal (2019): An EPR Strategy for Bio-responsive Fluorescence Guided Surgery with Simulation of the Benefit for Imaging. ChemRxiv. Preprint. https://doi.org/10.26434/chemrxiv.11316227.v1
+> Daly HC, Conroy E, Todor M, Wu D, Gallagher WM, O'Shea DF. An EPR Strategy for Bio-responsive Fluorescence Guided Surgery with Simulation of the Benefit for Imaging. Theranostics 2020; 10(7):3064-3082. doi:10.7150/thno.42702. Available from http://www.thno.org/v10p3064.htm
 
 ## Abstract
 
